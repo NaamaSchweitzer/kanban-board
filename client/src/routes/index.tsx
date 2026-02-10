@@ -1,25 +1,23 @@
-import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Route,
-} from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import Home from "../pages/Home";
 import Settings from "../pages/Settings";
 import Profile from "../pages/Profile";
-import Register from "../pages/Register";
-import Login from "../pages/Login";
+// import Register from "../pages/Register";
+// import Login from "../pages/Login";
 import DashBoard from "../pages/DashBoard";
+import Layout from "../layout";
 
-export const router = createBrowserRouter(
-  createRoutesFromElements(
-    <Route path="/">
-      <Route path="login" element={<Login />} />
-        <Route index element={<Home />} />
-        <Route path="home" element={<Home />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="profile" element={<Profile />} />
-        <Route path="register" element={<Register />} />
-        <Route path="dashboard" element={<DashBoard />} />
-    </Route>
-  )
-);
+export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Layout />,
+    // errorElement: <NotFoundPage />,
+    children: [
+      { index: true, element: <Home /> },
+      { path: "home", element: <Home /> },
+      { path: "settings", element: <Settings /> },
+      { path: "profile", element: <Profile /> },
+      { path: "dashboard/:boardId", element: <DashBoard /> },
+    ],
+  },
+]);
