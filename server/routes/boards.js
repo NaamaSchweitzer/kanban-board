@@ -12,8 +12,8 @@ const router = Router();
 // /boards?ownerId=...
 router.get("/", listBoardsByOwner);
 
-router.get("/:boardId", getBoardById);
 router.post("/", createBoard);
+router.get("/:boardId", getBoardById);
 router.put("/:boardId", updateBoard);
 router.delete("/:boardId", deleteBoard);
 

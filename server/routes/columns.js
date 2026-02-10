@@ -13,8 +13,8 @@ const router = Router();
 // /columns?boardId=...
 router.get("/", listColumnsByBoard);
 
-router.get("/:columnId", getColumnById);
 router.post("/", createColumn);
+router.get("/:columnId", getColumnById);
 router.put("/:columnId", updateColumn);
 router.delete("/:columnId", deleteColumn);
 

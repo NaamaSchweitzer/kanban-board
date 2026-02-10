@@ -19,8 +19,8 @@ router.get("/", async (req, res) => {
   else return serverResponse(res, 404, "query param boardId/columnId is required");
 });
 
-router.get("/:cardId", getCardById);
 router.post("/", createCard);
+router.get("/:cardId", getCardById);
 router.put("/:cardId", updateCard);
 router.delete("/:cardId", deleteCard);
 
