@@ -96,7 +96,7 @@ export const updateCard = async (req, res) => {
     const { cardId } = req.params;
     const { title, description, dueDate } = req.body;
 
-    const allowed = new Set(["title, description, dueDate"]);
+    const allowed = new Set(["title", "description", "dueDate"]);
 
     const incomingKeys = Object.keys(req.body);
     const invalidKeys = incomingKeys.filter((k) => !allowed.has(k));
