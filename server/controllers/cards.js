@@ -8,7 +8,11 @@ import {
   listCardsByColumnService,
   updateCardService,
 } from "../services/cards.js";
-import { newPositionBetween } from "../utils/position.js";
+import {
+  isPositionGapTight,
+  newPositionBetween,
+  rebalancePositions,
+} from "../utils/position.js";
 import { serverResponse } from "../utils/serverResponse.js";
 
 export const listCardsByBoard = async (req, res) => {
@@ -158,6 +162,18 @@ export const moveCard = async (req, res) => {
 
     if (!toColumnId) return serverResponse(res, 400, "toColumnId is required");
 
+    if (beforeCardId && beforeCardId === afterCardId) {
+      return serverResponse(
+        res,
+        400,
+        "beforeCardId and afterCardId cannot be the same",
+      );
+    }
+
+    if (cardId === beforeCardId || cardId === afterCardId) {
+      return serverResponse(res, 400, "Moved card cannot also be a neighbor");
+    }
+
     const card = await Card.findById(cardId);
     if (!card) return serverResponse(res, 404, "Card not found");
 
@@ -179,9 +195,50 @@ export const moveCard = async (req, res) => {
       ? await Card.findOne({ _id: afterCardId, columnId: toColumnId }).lean()
       : null;
 
+    if (beforeCardId && !beforeCard) {
+      return serverResponse(
+        res,
+        400,
+        "beforeCardId is invalid for target column",
+      );
+    }
+
+    if (afterCardId && !afterCard) {
+      return serverResponse(
+        res,
+        400,
+        "afterCardId is invalid for target column",
+      );
+    }
+
+    if (beforeCard && afterCard && beforeCard.position >= afterCard.position) {
+      return serverResponse(
+        res,
+        400,
+        "Neighbor cards are not in a valid order",
+      );
+    }
+
+    if (
+      isPositionGapTight(
+        beforeCard?.position ?? null,
+        afterCard?.position ?? null,
+      )
+    ) {
+      await rebalancePositions(Card, { columnId: toColumnId });
+    }
+
+    const refreshedBeforeCard = beforeCardId
+      ? await Card.findOne({ _id: beforeCardId, columnId: toColumnId }).lean()
+      : null;
+
+    const refreshedAfterCard = afterCardId
+      ? await Card.findOne({ _id: afterCardId, columnId: toColumnId }).lean()
+      : null;
+
     const newPos = newPositionBetween(
-      beforeCard?.position ?? null,
-      afterCard?.position ?? null,
+      refreshedBeforeCard?.position ?? beforeCard?.position ?? null,
+      refreshedAfterCard?.position ?? afterCard?.position ?? null,
     );
 
     card.columnId = toColumnId;

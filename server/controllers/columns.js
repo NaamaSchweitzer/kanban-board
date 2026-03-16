@@ -1,13 +1,17 @@
 import {
-  listColumnsByBoardService,
   createColumnService,
   deleteColumnService,
   getColumnByIdService,
+  listColumnsByBoardService,
   updateColumnService,
 } from "../services/columns.js";
 import { Column } from "../models/Column.js";
 import { serverResponse } from "../utils/serverResponse.js";
-import { newPositionBetween } from "../utils/position.js";
+import {
+  isPositionGapTight,
+  newPositionBetween,
+  rebalancePositions,
+} from "../utils/position.js";
 
 export const listColumnsByBoard = async (req, res) => {
   try {
@@ -128,6 +132,18 @@ export const moveColumn = async (req, res) => {
     const { columnId } = req.params;
     const { beforeColumnId = null, afterColumnId = null } = req.body;
 
+    if (beforeColumnId && beforeColumnId === afterColumnId) {
+      return serverResponse(
+        res,
+        400,
+        "beforeColumnId and afterColumnId cannot be the same",
+      );
+    }
+
+    if (columnId === beforeColumnId || columnId === afterColumnId) {
+      return serverResponse(res, 400, "Moved column cannot also be a neighbor");
+    }
+
     const column = await Column.findById(columnId);
     if (!column) {
       return serverResponse(res, 404, "Column not found");
@@ -144,9 +160,45 @@ export const moveColumn = async (req, res) => {
       ? await Column.findOne({ _id: afterColumnId, boardId }).lean()
       : null;
 
+    if (beforeColumnId && !before) {
+      return serverResponse(
+        res,
+        400,
+        "beforeColumnId is invalid for this board",
+      );
+    }
+
+    if (afterColumnId && !after) {
+      return serverResponse(
+        res,
+        400,
+        "afterColumnId is invalid for this board",
+      );
+    }
+
+    if (before && after && before.position >= after.position) {
+      return serverResponse(
+        res,
+        400,
+        "Neighbor columns are not in a valid order",
+      );
+    }
+
+    if (isPositionGapTight(before?.position ?? null, after?.position ?? null)) {
+      await rebalancePositions(Column, { boardId });
+    }
+
+    const refreshedBefore = beforeColumnId
+      ? await Column.findOne({ _id: beforeColumnId, boardId }).lean()
+      : null;
+
+    const refreshedAfter = afterColumnId
+      ? await Column.findOne({ _id: afterColumnId, boardId }).lean()
+      : null;
+
     const newPos = newPositionBetween(
-      before?.position ?? null,
-      after?.position ?? null,
+      refreshedBefore?.position ?? before?.position ?? null,
+      refreshedAfter?.position ?? after?.position ?? null,
     );
 
     column.position = newPos;
