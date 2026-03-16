@@ -1,27 +1,41 @@
 import mongoose from "mongoose";
+import { boardMessages } from "../constants/messages.js";
+import { success, failure } from "../utils/serviceResult.js";
 import { Board } from "../models/Board.js";
 import { Column } from "../models/Column.js";
 import { Card } from "../models/Card.js";
+import { User } from "../models/User.js";
+
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 export const listBoardsByOwnerService = async (ownerId) => {
+  if (!isValidObjectId(ownerId)) {
+    return failure(400, boardMessages.invalidOwnerId);
+  }
+
+  const ownerExists = await User.exists({ _id: ownerId });
+  if (!ownerExists) {
+    return failure(404, boardMessages.ownerNotFound);
+  }
+
   const boards = await Board.find({ ownerId }).sort({ createdAt: -1 });
-  return boards;
+  return success(boards);
 };
 
 export const getBoardByIdService = async (boardId) => {
-  if (!mongoose.Types.ObjectId.isValid(boardId)) {
-    return { ok: false, status: 400, message: "Invalid boardId" };
+  if (!isValidObjectId(boardId)) {
+    return failure(400, boardMessages.invalidId);
   }
 
   const board = await Board.findById(boardId);
   if (!board) {
-    return { ok: false, status: 404, message: "Board not found" };
+    return failure(404, boardMessages.notFound);
   }
 
   const columns = await Column.find({ boardId }).sort({ position: 1 });
   const cards = await Card.find({ boardId }).sort({ columnId: 1, position: 1 });
 
-  return { ok: true, status: 200, data: { board, columns, cards } };
+  return success({ board, columns, cards });
 };
 
 export const createBoardService = async ({
@@ -29,37 +43,55 @@ export const createBoardService = async ({
   description = null,
   ownerId,
 }) => {
+  if (!isValidObjectId(ownerId)) {
+    return failure(400, boardMessages.invalidOwnerId);
+  }
+
+  const ownerExists = await User.exists({ _id: ownerId });
+  if (!ownerExists) {
+    return failure(404, boardMessages.ownerNotFound);
+  }
+
   const board = await Board.create({ name, description, ownerId });
-  return board;
+  return success(board, 201);
 };
 
 export const updateBoardService = async ({ boardId, name, description }) => {
+  if (!isValidObjectId(boardId)) {
+    return failure(400, boardMessages.invalidId);
+  }
+
   const updates = {};
 
   if (name !== undefined) updates.name = name;
   if (description !== undefined) updates.description = description;
 
-  // nothing to update
   if (Object.keys(updates).length === 0) {
-    return null;
+    return failure(400, boardMessages.noFieldsToUpdate);
   }
 
   const updatedBoard = await Board.findByIdAndUpdate(boardId, updates, {
     new: true,
   });
 
-  return updatedBoard;
+  if (!updatedBoard) {
+    return failure(404, boardMessages.notFound);
+  }
+
+  return success(updatedBoard);
 };
 
 export const deleteBoardService = async (boardId) => {
+  if (!isValidObjectId(boardId)) {
+    return failure(400, boardMessages.invalidId);
+  }
+
   const deletedBoard = await Board.findByIdAndDelete(boardId);
 
-  // if board didn't exist
-  if (!deletedBoard) return null;
+  if (!deletedBoard) return failure(404, boardMessages.notFound);
 
-  // cascade delete
   await Column.deleteMany({ boardId });
   await Card.deleteMany({ boardId });
 
-  return deletedBoard;
+  return success(deletedBoard);
 };

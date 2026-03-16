@@ -1,3 +1,4 @@
+import { boardMessages, commonMessages } from "../constants/messages.js";
 import { serverResponse } from "../utils/serverResponse.js";
 import {
   createBoardService,
@@ -12,14 +13,19 @@ export const listBoardsByOwner = async (req, res) => {
     const { ownerId } = req.query;
 
     if (!ownerId) {
-      return serverResponse(res, 400, "ownerId query param is required");
+      return serverResponse(res, 400, boardMessages.ownerIdQueryRequired);
     }
 
-    const boards = await listBoardsByOwnerService(ownerId);
-    return serverResponse(res, 200, boards);
+    const result = await listBoardsByOwnerService(ownerId);
+
+    if (!result.ok) {
+      return serverResponse(res, result.status, result.message);
+    }
+
+    return serverResponse(res, result.status, result.data);
   } catch (err) {
     console.error("listBoardsByOwner error:", err);
-    return serverResponse(res, 500, "Server error");
+    return serverResponse(res, 500, commonMessages.serverError);
   }
 };
 
@@ -36,7 +42,7 @@ export const getBoardById = async (req, res) => {
     return serverResponse(res, 200, result.data);
   } catch (err) {
     console.error("getBoardById error:", err);
-    return serverResponse(res, 500, "Server error");
+    return serverResponse(res, 500, commonMessages.serverError);
   }
 };
 
@@ -45,13 +51,18 @@ export const createBoard = async (req, res) => {
     const { name, description = null, ownerId } = req.body;
 
     if (!name || !ownerId)
-      return serverResponse(res, 400, "name and ownerId are required");
+      return serverResponse(res, 400, boardMessages.createRequiredFields);
 
-    const board = await createBoardService({ name, description, ownerId });
-    return serverResponse(res, 201, board);
+    const result = await createBoardService({ name, description, ownerId });
+
+    if (!result.ok) {
+      return serverResponse(res, result.status, result.message);
+    }
+
+    return serverResponse(res, result.status, result.data);
   } catch (err) {
     console.error("createBoard error:", err);
-    return serverResponse(res, 500, "Server error");
+    return serverResponse(res, 500, commonMessages.serverError);
   }
 };
 
@@ -69,24 +80,24 @@ export const updateBoard = async (req, res) => {
       return serverResponse(
         res,
         400,
-        `Invalid fields: ${invalidKeys.join(", ")}`,
+        commonMessages.invalidFields(invalidKeys),
       );
     }
 
-    const updated = await updateBoardService({
+    const result = await updateBoardService({
       boardId,
       name,
       description,
     });
 
-    if (!updated) {
-      return serverResponse(res, 404, "Board not found or no fields to update");
+    if (!result.ok) {
+      return serverResponse(res, result.status, result.message);
     }
 
-    return serverResponse(res, 200, updated);
+    return serverResponse(res, result.status, result.data);
   } catch (err) {
     console.error("updateBoard error:", err);
-    return serverResponse(res, 500, "Server error");
+    return serverResponse(res, 500, commonMessages.serverError);
   }
 };
 
@@ -94,15 +105,15 @@ export const deleteBoard = async (req, res) => {
   try {
     const { boardId } = req.params;
 
-    const board = await deleteBoardService(boardId);
+    const result = await deleteBoardService(boardId);
 
-    if (!board) {
-      return serverResponse(res, 404, "Board not found");
+    if (!result.ok) {
+      return serverResponse(res, result.status, result.message);
     }
 
     return serverResponse(res, 200, { ok: true, deletedBoardId: boardId });
   } catch (err) {
     console.error("deleteBoard error:", err);
-    return serverResponse(res, 500, "Server error");
+    return serverResponse(res, 500, commonMessages.serverError);
   }
 };

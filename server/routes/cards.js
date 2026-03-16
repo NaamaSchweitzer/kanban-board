@@ -8,6 +8,7 @@ import {
   deleteCard,
   moveCard,
 } from "../controllers/cards.js";
+import { cardMessages } from "../constants/messages.js";
 import { serverResponse } from "../utils/serverResponse.js";
 
 const router = Router();
@@ -16,7 +17,7 @@ const router = Router();
 router.get("/", async (req, res) => {
   if (req.query.columnId) return listCardsByColumn(req, res);
   else if (req.query.boardId) return listCardsByBoard(req, res);
-  else return serverResponse(res, 404, "query param boardId/columnId is required");
+  else return serverResponse(res, 400, cardMessages.boardOrColumnQueryRequired);
 });
 
 router.post("/", createCard);
