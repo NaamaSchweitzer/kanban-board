@@ -8,7 +8,6 @@ const cardSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-
     columnId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Column",
@@ -21,17 +20,14 @@ const cardSchema = new mongoose.Schema(
     dueDate: { type: String, default: null },
 
     // assigneeId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
-
-    // Drag & drop ordering inside a column
-    position: { type: Number, required: true, default: 1000 },
   },
   { timestamps: true },
 );
 
-// Fast sorted fetch of cards in a column
-cardSchema.index({ columnId: 1, position: 1 });
+// Fast fetch of cards in a column
+cardSchema.index({ columnId: 1 });
 
 // Fast “board snapshot” fetch
-cardSchema.index({ boardId: 1, columnId: 1, position: 1 });
+cardSchema.index({ boardId: 1 });
 
 export const Card = mongoose.model("Card", cardSchema);

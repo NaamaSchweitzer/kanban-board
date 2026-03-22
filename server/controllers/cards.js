@@ -1,4 +1,8 @@
-import { cardMessages, commonMessages } from "../constants/messages.js";
+import {
+  cardMessages,
+  columnMessages,
+  commonMessages,
+} from "../constants/messages.js";
 import {
   createCardService,
   deleteCardService,
@@ -82,6 +86,7 @@ export const createCard = async (req, res) => {
     if (!boardId || !columnId || !title) {
       return serverResponse(res, 400, cardMessages.createRequiredFields);
     }
+
     const result = await createCardService({
       boardId,
       columnId,
@@ -89,6 +94,7 @@ export const createCard = async (req, res) => {
       description,
       dueDate,
     });
+
     if (!result.ok) {
       return serverResponse(res, result.status, result.message);
     }
@@ -139,6 +145,7 @@ export const updateCard = async (req, res) => {
 export const deleteCard = async (req, res) => {
   try {
     const { cardId } = req.params;
+
     const result = await deleteCardService(cardId);
 
     if (!result.ok) {
@@ -152,24 +159,31 @@ export const deleteCard = async (req, res) => {
   }
 };
 
-/** req:
- * - params: cardId
- * - body: {
- *   toColumnId: string,
- *   beforeCardId?: string|null,
- *   afterCardId?: string|null
- * }
- */
+// cross column move
 export const moveCard = async (req, res) => {
   try {
     const { cardId } = req.params;
-    const { toColumnId, beforeCardId = null, afterCardId = null } = req.body;
+    const {
+      sourceColumnId,
+      destinationColumnId,
+      sourceCardIds,
+      destinationCardIds,
+    } = req.body;
+
+    if (!sourceColumnId || !destinationColumnId) {
+      return serverResponse(res, 400, cardMessages.moveRequiredFields);
+    }
+
+    if (!Array.isArray(sourceCardIds) || !Array.isArray(destinationCardIds)) {
+      return serverResponse(res, 400, columnMessages.cardIdsRequired);
+    }
 
     const result = await moveCardService({
       cardId,
-      toColumnId,
-      beforeCardId,
-      afterCardId,
+      sourceColumnId,
+      destinationColumnId,
+      sourceCardIds,
+      destinationCardIds,
     });
 
     if (!result.ok) {

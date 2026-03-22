@@ -25,7 +25,7 @@ router.get("/:cardId", getCardById);
 router.put("/:cardId", updateCard);
 router.delete("/:cardId", deleteCard);
 
-// Drag & drop card move/reorder
+// card drag across columns
 router.patch("/:cardId/move", moveCard);
 
 export default router;

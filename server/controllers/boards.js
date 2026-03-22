@@ -6,6 +6,7 @@ import {
   getBoardByIdService,
   listBoardsByOwnerService,
   updateBoardService,
+  reorderColumnsService,
 } from "../services/boards.js";
 
 export const listBoardsByOwner = async (req, res) => {
@@ -114,6 +115,28 @@ export const deleteBoard = async (req, res) => {
     return serverResponse(res, 200, { ok: true, deletedBoardId: boardId });
   } catch (err) {
     console.error("deleteBoard error:", err);
+    return serverResponse(res, 500, commonMessages.serverError);
+  }
+};
+
+export const reorderColumns = async (req, res) => {
+  try {
+    const { boardId } = req.params;
+    const { columnIds } = req.body;
+
+    if (!Array.isArray(columnIds)) {
+      return serverResponse(res, 400, boardMessages.columnIdsRequired);
+    }
+
+    const result = await reorderColumnsService({ boardId, columnIds });
+
+    if (!result.ok) {
+      return serverResponse(res, result.status, result.message);
+    }
+
+    return serverResponse(res, 200, result.data);
+  } catch (err) {
+    console.error("reorderColumns error:", err);
     return serverResponse(res, 500, commonMessages.serverError);
   }
 };

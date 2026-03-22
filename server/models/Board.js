@@ -10,8 +10,12 @@ const boardSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    columnIds: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Column" }],
+      default: [],
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Board = mongoose.model("Board", boardSchema);

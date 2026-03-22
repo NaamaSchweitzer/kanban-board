@@ -5,13 +5,14 @@
     "columnId": "65c0f3000000000000000001",
     "title": "Task A",
     "description": "First task",
-    "position": 1000
+    "dueDate": null
   },
   {
     "_id": "65c0f4000000000000000002",
     "boardId": "65c0f2000000000000000001",
     "columnId": "65c0f3000000000000000001",
     "title": "Task B",
-    "position": 2000
+    "description": null,
+    "dueDate": null
   }
 ]

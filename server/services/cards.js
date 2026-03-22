@@ -8,17 +8,12 @@ import { success, failure } from "../utils/serviceResult.js";
 import { Board } from "../models/Board.js";
 import { Card } from "../models/Card.js";
 import { Column } from "../models/Column.js";
-import {
-  isPositionGapTight,
-  newPositionBetween,
-  rebalancePositions,
-} from "../utils/position.js";
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 export const listCardsByBoardService = async (boardId) => {
   if (!isValidObjectId(boardId)) {
-    return failure(400, cardMessages.invalidBoardId);
+    return failure(400, boardMessages.invalidId);
   }
 
   const boardExists = await Board.exists({ _id: boardId });
@@ -26,13 +21,13 @@ export const listCardsByBoardService = async (boardId) => {
     return failure(404, boardMessages.notFound);
   }
 
-  const cards = await Card.find({ boardId }).sort({ columnId: 1, position: 1 });
+  const cards = await Card.find({ boardId });
   return success(cards);
 };
 
 export const listCardsByColumnService = async (columnId) => {
   if (!isValidObjectId(columnId)) {
-    return failure(400, cardMessages.invalidColumnId);
+    return failure(400, columnMessages.invalidId);
   }
 
   const columnExists = await Column.exists({ _id: columnId });
@@ -40,7 +35,7 @@ export const listCardsByColumnService = async (columnId) => {
     return failure(404, columnMessages.notFound);
   }
 
-  const cards = await Card.find({ columnId }).sort({ position: 1 });
+  const cards = await Card.find({ columnId });
   return success(cards);
 };
 
@@ -65,11 +60,11 @@ export const createCardService = async ({
   dueDate,
 }) => {
   if (!isValidObjectId(boardId)) {
-    return failure(400, cardMessages.invalidBoardId);
+    return failure(400, boardMessages.invalidId);
   }
 
   if (!isValidObjectId(columnId)) {
-    return failure(400, cardMessages.invalidColumnId);
+    return failure(400, columnMessages.invalidId);
   }
 
   const boardExists = await Board.exists({ _id: boardId });
@@ -82,17 +77,16 @@ export const createCardService = async ({
     return failure(404, cardMessages.boardOrColumnNotFound);
   }
 
-  const last = await Card.findOne({ columnId }).sort({ position: -1 }).lean();
-  const position = last ? last.position + 1000 : 1000;
-
   const card = await Card.create({
     boardId,
     columnId,
     title,
     description,
     dueDate,
-    position,
   });
+
+  // Append to column's cardIds to register the order
+  await Column.findByIdAndUpdate(columnId, { $push: { cardIds: card._id } });
 
   return success(card, 201);
 };
@@ -118,7 +112,6 @@ export const updateCardService = async ({
   }
 
   const updated = await Card.findByIdAndUpdate(cardId, updates, { new: true });
-
   if (!updated) {
     return failure(404, cardMessages.notFound);
   }
@@ -136,41 +129,31 @@ export const deleteCardService = async (cardId) => {
     return failure(404, cardMessages.notFound);
   }
 
+  // Remove from column's cardIds
+  await Column.findByIdAndUpdate(deleted.columnId, {
+    $pull: { cardIds: deleted._id },
+  });
+
   return success(deleted);
 };
 
+// cross column move
 export const moveCardService = async ({
   cardId,
-  toColumnId,
-  beforeCardId = null,
-  afterCardId = null,
+  sourceColumnId,
+  destinationColumnId,
+  sourceCardIds,
+  destinationCardIds,
 }) => {
-  if (!toColumnId) {
-    return failure(400, cardMessages.targetColumnRequired);
-  }
-
   if (!isValidObjectId(cardId)) {
     return failure(400, cardMessages.invalidId);
   }
 
-  if (!isValidObjectId(toColumnId)) {
-    return failure(400, cardMessages.invalidColumnId);
-  }
-
-  if (beforeCardId && beforeCardId === afterCardId) {
-    return failure(400, cardMessages.beforeAndAfterCannotMatch);
-  }
-
-  if (cardId === beforeCardId || cardId === afterCardId) {
-    return failure(400, cardMessages.movedCannotBeNeighbor);
-  }
-
-  if (beforeCardId && !isValidObjectId(beforeCardId)) {
-    return failure(400, cardMessages.invalidBeforeNeighbor);
-  }
-
-  if (afterCardId && !isValidObjectId(afterCardId)) {
-    return failure(400, cardMessages.invalidAfterNeighbor);
+  if (
+    !isValidObjectId(sourceColumnId) ||
+    !isValidObjectId(destinationColumnId)
+  ) {
+    return failure(400, columnMessages.invalidId);
   }
 
   const card = await Card.findById(cardId);
@@ -178,59 +161,25 @@ export const moveCardService = async ({
     return failure(404, cardMessages.notFound);
   }
 
-  const targetCol = await Column.findOne({
-    _id: toColumnId,
+  const destinationColumn = await Column.findOne({
+    _id: destinationColumnId,
     boardId: card.boardId,
-  }).lean();
-
-  if (!targetCol) {
+  });
+  if (!destinationColumn) {
     return failure(400, cardMessages.invalidTargetColumn);
   }
 
-  const beforeCard = beforeCardId
-    ? await Card.findOne({ _id: beforeCardId, columnId: toColumnId }).lean()
-    : null;
+  await Column.findByIdAndUpdate(sourceColumnId, {
+    $set: { cardIds: sourceCardIds },
+  });
 
-  const afterCard = afterCardId
-    ? await Card.findOne({ _id: afterCardId, columnId: toColumnId }).lean()
-    : null;
+  await Column.findByIdAndUpdate(destinationColumnId, {
+    $set: { cardIds: destinationCardIds },
+  });
 
-  if (beforeCardId && !beforeCard) {
-    return failure(400, cardMessages.invalidBeforeNeighbor);
-  }
+  await Card.findByIdAndUpdate(cardId, {
+    $set: { columnId: destinationColumnId },
+  });
 
-  if (afterCardId && !afterCard) {
-    return failure(400, cardMessages.invalidAfterNeighbor);
-  }
-
-  if (beforeCard && afterCard && beforeCard.position >= afterCard.position) {
-    return failure(400, cardMessages.invalidNeighborOrder);
-  }
-
-  if (
-    isPositionGapTight(
-      beforeCard?.position ?? null,
-      afterCard?.position ?? null,
-    )
-  ) {
-    await rebalancePositions(Card, { columnId: toColumnId });
-  }
-
-  const refreshedBeforeCard = beforeCardId
-    ? await Card.findOne({ _id: beforeCardId, columnId: toColumnId }).lean()
-    : null;
-
-  const refreshedAfterCard = afterCardId
-    ? await Card.findOne({ _id: afterCardId, columnId: toColumnId }).lean()
-    : null;
-
-  card.columnId = toColumnId;
-  card.position = newPositionBetween(
-    refreshedBeforeCard?.position ?? beforeCard?.position ?? null,
-    refreshedAfterCard?.position ?? afterCard?.position ?? null,
-  );
-
-  await card.save();
-
-  return success(card);
+  return success({ cardId, sourceColumnId, destinationColumnId });
 };

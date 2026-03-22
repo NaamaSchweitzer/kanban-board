@@ -32,8 +32,8 @@ export const getBoardByIdService = async (boardId) => {
     return failure(404, boardMessages.notFound);
   }
 
-  const columns = await Column.find({ boardId }).sort({ position: 1 });
-  const cards = await Card.find({ boardId }).sort({ columnId: 1, position: 1 });
+  const columns = await Column.find({ boardId });
+  const cards = await Card.find({ boardId });
 
   return success({ board, columns, cards });
 };
@@ -94,4 +94,20 @@ export const deleteBoardService = async (boardId) => {
   await Card.deleteMany({ boardId });
 
   return success(deletedBoard);
+};
+
+export const reorderColumnsService = async ({ boardId, columnIds }) => {
+  if (!isValidObjectId(boardId)) {
+    return failure(400, boardMessages.invalidId);
+  }
+
+  const board = await Board.findByIdAndUpdate(
+    boardId,
+    { $set: { columnIds } },
+    { new: true },
+  );
+
+  if (!board) return failure(404, boardMessages.notFound);
+
+  return success(board);
 };

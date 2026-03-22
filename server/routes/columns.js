@@ -5,7 +5,7 @@ import {
   getColumnById,
   updateColumn,
   deleteColumn,
-  moveColumn
+  reorderCards
 } from "../controllers/columns.js";
 
 const router = Router();
@@ -18,7 +18,7 @@ router.get("/:columnId", getColumnById);
 router.put("/:columnId", updateColumn);
 router.delete("/:columnId", deleteColumn);
 
-// Drag & drop reorder columns
-router.patch("/:columnId/move", moveColumn);
+// card drag within same column
+router.patch("/:columnId/reorder-cards", reorderCards);
 
 export default router;

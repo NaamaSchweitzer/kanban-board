@@ -3,8 +3,8 @@ import {
   deleteColumnService,
   getColumnByIdService,
   listColumnsByBoardService,
-  moveColumnService,
   updateColumnService,
+  reorderCardsService,
 } from "../services/columns.js";
 import { columnMessages, commonMessages } from "../constants/messages.js";
 import { serverResponse } from "../utils/serverResponse.js";
@@ -114,34 +114,25 @@ export const deleteColumn = async (req, res) => {
   }
 };
 
-/** About moveColumn logic:
- * gets in request:
- * - param: columnId
- * - body: { beforeColumnId?: string|null, afterColumnId?: string|null }
- * columnId - the column to move
- * beforeColumnId/afterColumnId can also be null to indicate an end/start
- * result:
- * the order should be changed from orginally being [..., beforeColumnId, afterColumnId,...]
- * to the order: [..., beforeColumnId, columnId, afterColumnId,...]
- */
-export const moveColumn = async (req, res) => {
+// same column reorder
+export const reorderCards = async (req, res) => {
   try {
     const { columnId } = req.params;
-    const { beforeColumnId = null, afterColumnId = null } = req.body;
+    const { cardIds } = req.body;
 
-    const result = await moveColumnService({
-      columnId,
-      beforeColumnId,
-      afterColumnId,
-    });
+    if (!Array.isArray(cardIds)) {
+      return serverResponse(res, 400, columnMessages.cardIdsRequired);
+    }
+
+    const result = await reorderCardsService({ columnId, cardIds });
 
     if (!result.ok) {
       return serverResponse(res, result.status, result.message);
     }
 
-    return serverResponse(res, result.status, result.data);
+    return serverResponse(res, 200, result.data);
   } catch (err) {
-    console.error("moveColumn error:", err);
+    console.error("reorderCards error:", err);
     return serverResponse(res, 500, commonMessages.serverError);
   }
 };
