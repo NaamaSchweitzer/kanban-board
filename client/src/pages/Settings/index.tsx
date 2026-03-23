@@ -1,5 +1,7 @@
+import SettingsMenu from "../../components/SettingsMenu";
+
 const Settings = () => {
-  return <div>SettingsPage</div>;
+  return <SettingsMenu />;
 };
 
 export default Settings;
