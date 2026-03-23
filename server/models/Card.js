@@ -24,10 +24,4 @@ const cardSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// Fast fetch of cards in a column
-cardSchema.index({ columnId: 1 });
-
-// Fast “board snapshot” fetch
-cardSchema.index({ boardId: 1 });
-
 export const Card = mongoose.model("Card", cardSchema);

@@ -9,9 +9,9 @@ const userSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
       unique: true,
-      match: [/.+@.+\..+/, "Please fill a valid email address"], // regex validator
+      match: [/.+@.+\..+/, "Please fill a valid email address"],
     },
-    password: { type: String, required: true},
+    password: { type: String, required: true, select: false }, // excluded by default
   },
   { timestamps: true },
 );

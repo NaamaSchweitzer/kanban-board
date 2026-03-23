@@ -4,7 +4,7 @@ import "dotenv/config";
 import boardsRoutes from "./routes/boards.js";
 import columnsRoutes from "./routes/columns.js";
 import cardsRoutes from "./routes/cards.js";
-// import usersRoutes from "./routes/users.js";
+import usersRoutes from "./routes/users.js";
 import devRoutes from "./routes/dev.js";
 import { connectDB } from "./DB/db.js";
 
@@ -21,7 +21,7 @@ app.use("/dev", devRoutes);
 app.use("/api/boards", boardsRoutes);
 app.use("/api/columns", columnsRoutes);
 app.use("/api/cards", cardsRoutes);
-// app.use("/api/users", usersRoutes);
+app.use("/api/users", usersRoutes);
 
 
 const startServer = async () => {

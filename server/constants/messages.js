@@ -3,6 +3,20 @@ export const commonMessages = {
   invalidFields: (fields) => `Invalid fields: ${fields.join(", ")}`,
 };
 
+export const userMessages = {
+  invalidId: "Invalid userId",
+  notFound: "User not found",
+  registerRequiredFields: "username, email and password are required",
+  loginRequiredFields: "email and password are required",
+  changePasswordRequiredFields: "oldPassword and newPassword are required",
+  emailAlreadyExists: "Email already exists",
+  usernameAlreadyExists: "Username already exists",
+  duplicateField: "Email or username already exists",
+  invalidCredentials: "Invalid email or password",
+  wrongPassword: "Current password is incorrect",
+  noFieldsToUpdate: "No user fields provided for update",
+};
+
 export const boardMessages = {
   ownerIdQueryRequired: "ownerId query param is required",
   invalidOwnerId: "Invalid ownerId",

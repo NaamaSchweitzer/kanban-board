@@ -19,7 +19,5 @@ const columnSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// Fast fetch of columns for a board
-columnSchema.index({ boardId: 1 });
 
 export const Column = mongoose.model("Column", columnSchema);
