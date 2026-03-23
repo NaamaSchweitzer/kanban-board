@@ -14,27 +14,26 @@ import {
 import { DeleteOutline } from "@mui/icons-material";
 import * as api from "../../api/kanban";
 import type { Board } from "../../types/kanban";
+import { useAuth } from "../../contexts/AuthContext";
 import CreateBoardModal from "../../components/CreateBoardModal";
 
-// TODO: replace with actual user ID from auth context
-const DEMO_OWNER_ID = "65c0f1000000000000000001";
-
 const Home = () => {
+  const { user } = useAuth();
   const [boards, setBoards] = useState<Board[]>([]);
   const [isCreating, setIsCreating] = useState(false);
-  // const [newBoardName, setNewBoardName] = useState("");
-  // const [newBoardDescription, setNewBoardDescription] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.listBoards(DEMO_OWNER_ID).then(setBoards).catch(console.error);
-  }, []);
+    if (!user) return;
+    api.listBoards(user._id).then(setBoards).catch(console.error);
+  }, [user]);
 
   const handleCreateBoard = async (name: string, description: string) => {
+    if (!user) return;
     const created = await api.createBoard({
       name,
       description,
-      ownerId: DEMO_OWNER_ID,
+      ownerId: user._id,
     });
     // addBoard
     setBoards((prev) => [...prev, created]);
