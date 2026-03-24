@@ -8,6 +8,8 @@ import {
 } from "@mui/material";
 import { DeleteOutline } from "@mui/icons-material";
 import type { Card, Id } from "../types/kanban";
+import ConfirmationModal from "./ConfirmationModal";
+import { useState } from "react";
 
 interface CardItemProps {
   card: Card;
@@ -24,38 +26,56 @@ const CardItem = ({
   isDragging = false,
   onDeleteCard,
 }: CardItemProps) => {
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+
+  const handleDelete = () => {
+    onDeleteCard?.(card._id, card.columnId);
+    setOpenDeleteModal(false);
+  };
+
   return (
-    <MuiCard
-      elevation={3}
-      sx={{ mb: 1, opacity: isDragging ? 0.5 : undefined, cursor: "grab" }}
-    >
-      <CardActionArea>
-        <CardContent
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            "&:last-child": { pb: 2 },
-          }}
-        >
-          <Typography variant="subtitle1" sx={{ flex: 1 }}>
-            {card.title}
-          </Typography>
-          {onDeleteCard && (
-            <Box
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                onDeleteCard(card._id, card.columnId);
-              }}
-            >
-              <IconButton size="small">
-                <DeleteOutline fontSize="small" />
-              </IconButton>
-            </Box>
-          )}
-        </CardContent>
-      </CardActionArea>
-    </MuiCard>
+    <>
+      <MuiCard
+        elevation={3}
+        sx={{ mb: 1, opacity: isDragging ? 0.5 : undefined, cursor: "grab" }}
+      >
+        <CardActionArea>
+          <CardContent
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              "&:last-child": { pb: 2 },
+            }}
+          >
+            <Typography variant="subtitle1" sx={{ flex: 1 }}>
+              {card.title}
+            </Typography>
+            {onDeleteCard && (
+              <Box
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenDeleteModal(true);
+                }}
+              >
+                <IconButton size="small">
+                  <DeleteOutline fontSize="small" />
+                </IconButton>
+              </Box>
+            )}
+          </CardContent>
+        </CardActionArea>
+      </MuiCard>
+
+      {/* Delete Card Confirmation Modal */}
+      <ConfirmationModal
+        open={openDeleteModal}
+        title="Delete card"
+        message={`Are you sure you want to delete "${card.title}"?`}
+        onConfirm={handleDelete}
+        onCancel={() => setOpenDeleteModal(false)}
+      />
+    </>
   );
 };
 
