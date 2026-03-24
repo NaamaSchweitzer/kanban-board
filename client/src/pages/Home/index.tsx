@@ -7,7 +7,6 @@ import {
   CardActionArea,
   CardContent,
   Container,
-  Grid,
   IconButton,
   Typography,
 } from "@mui/material";
@@ -68,14 +67,14 @@ const Home = () => {
         </Button>
       </Box>
 
-      {/* <Box
+      {/* <Grid size={{ xs: 12 }}> */}
+      <Box
         sx={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
           gap: 2,
         }}
-      > */}
-      <Grid size={{ xs: 12 }}>
+      >
         {boards.map((board) => (
           <Card key={String(board._id)} elevation={2}>
             <CardActionArea onClick={() => navigate(`/dashboard/${board._id}`)}>
@@ -104,9 +103,8 @@ const Home = () => {
             </CardActionArea>
           </Card>
         ))}
-      </Grid>
-
-      {/* </Box> */}
+      </Box>
+      {/* </Grid> */}
 
       {boards.length === 0 && (
         <Typography color="text.secondary" sx={{ mt: 4, textAlign: "center" }}>

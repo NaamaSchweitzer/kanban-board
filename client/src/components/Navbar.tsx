@@ -9,8 +9,8 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import {
   DarkModeOutlined as DarkModeIcon,
-  Home as HomeIcon,
   LightModeOutlined as LightModeIcon,
+  Home as HomeIcon,
 } from "@mui/icons-material";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -29,8 +29,8 @@ const Navbar = () => {
     <AppBar
       position="static"
       sx={{
-        color: (theme) =>
-          theme.palette.mode === "light" ? "secondary.main" : "text.primary",
+        bgcolor: themeMode === "light" ? "primary.light" : "transparent",
+        color: themeMode === "light" ? "secondary.main" : "text.primary",
       }}
     >
       <Toolbar
@@ -43,7 +43,12 @@ const Navbar = () => {
         {/* Navigation Links */}
         {isAuthenticated ? (
           <>
-            <IconButton component={Link} to="/home" edge="start" color="inherit">
+            <IconButton
+              component={Link}
+              to="/home"
+              edge="start"
+              color="inherit"
+            >
               <HomeIcon />
             </IconButton>
             <Button component={Link} to="/settings" color="inherit">

@@ -76,8 +76,11 @@ export function useBoardActions(
   // ====================== CARDS ======================
 
   const createCard = useCallback(
-    async (columnId: Id, title: string) => {
-      const created = await api.createCard({ boardId, columnId, title });
+    async (
+      columnId: Id,
+      data: { title: string; description?: string; dueDate?: string | null },
+    ) => {
+      const created = await api.createCard({ boardId, columnId, ...data });
       setBoardState((prev) => {
         if (!prev) return prev;
         return {

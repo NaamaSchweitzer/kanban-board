@@ -10,7 +10,7 @@ import {
 import { useState } from "react";
 
 interface AddNewColumnProps {
-  onCreateColumn: (title: string) => Promise<void>;
+  onCreateColumn: (title: string) => void;
 }
 
 const AddNewColumn = ({ onCreateColumn }: AddNewColumnProps) => {

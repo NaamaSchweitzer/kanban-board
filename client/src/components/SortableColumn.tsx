@@ -13,7 +13,10 @@ interface SortableColumnProps {
   cards: Card[];
   onUpdateColumn: (columnId: Id, title: string) => Promise<void>;
   onDeleteColumn: (columnId: Id) => Promise<void>;
-  onCreateCard: (columnId: Id, title: string) => Promise<void>;
+  onCreateCard: (
+    columnId: Id,
+    data: { title: string; description?: string; dueDate?: string | null },
+  ) => Promise<void>;
   onUpdateCard: (
     cardId: Id,
     data: { title?: string; description?: string; dueDate?: string | null },

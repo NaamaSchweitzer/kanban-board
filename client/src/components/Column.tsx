@@ -5,17 +5,24 @@ import {
   IconButton,
   Paper,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
-import { Add, CloseRounded, DeleteOutline } from "@mui/icons-material";
+import { Add, DeleteOutline } from "@mui/icons-material";
 import type { Column, Id } from "../types/kanban";
+import { useTheme } from "../contexts/ThemeContext";
+import CardCreationForm, { type CardFormData } from "./CardCreationForm";
+import ConfirmationModal from "./ConfirmationModal";
 
 interface ColumnItemProps {
   column: Column;
   dragHandleProps?: Record<string, unknown>;
   onUpdateColumn?: (columnId: Id, title: string) => Promise<void>;
   onDeleteColumn?: (columnId: Id) => Promise<void>;
-  onCreateCard?: (columnId: Id, title: string) => Promise<void>;
+  onCreateCard?: (
+    columnId: Id,
+    data: { title: string; description?: string; dueDate?: string | null },
+  ) => Promise<void>;
   children: ReactNode;
 }
 
@@ -29,8 +36,11 @@ const ColumnItem = ({
 }: ColumnItemProps) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editTitle, setEditTitle] = useState(column.title);
+
   const [isAddingCard, setIsAddingCard] = useState(false);
-  const [newCardTitle, setNewCardTitle] = useState("");
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+
+  const { themeMode } = useTheme();
 
   const handleTitleSubmit = () => {
     const trimmed = editTitle.trim();
@@ -40,12 +50,14 @@ const ColumnItem = ({
     setIsEditingTitle(false);
   };
 
-  const handleAddCard = () => {
-    if (newCardTitle.trim()) {
-      onCreateCard?.(column._id, newCardTitle.trim());
-      setNewCardTitle("");
-      setIsAddingCard(false);
-    }
+  const handleAddCard = (data: CardFormData) => {
+    onCreateCard?.(column._id, data);
+    setIsAddingCard(false);
+  };
+
+  const handleDeleteList = () => {
+    onDeleteColumn?.(column._id);
+    setOpenDeleteModal(false);
   };
 
   return (
@@ -90,18 +102,23 @@ const ColumnItem = ({
             }}
             size="small"
             autoFocus
-            sx={{ flex: 1 }}
+            sx={{
+              flex: 1,
+              bgcolor: themeMode === "light" ? "white" : "background.paper.100",
+            }}
           />
         ) : (
-          <Typography
-            variant="subtitle1"
-            onClick={() => setIsEditingTitle(true)}
-            sx={{ flex: 1, cursor: "pointer" }}
-          >
-            {column.title}
-          </Typography>
+          <Tooltip title="Click to edit title" arrow>
+            <Typography
+              variant="subtitle1"
+              onClick={() => setIsEditingTitle(true)}
+              sx={{ flex: 1, cursor: "pointer" }}
+            >
+              {column.title}
+            </Typography>
+          </Tooltip>
         )}
-        <IconButton size="small" onClick={() => onDeleteColumn?.(column._id)}>
+        <IconButton size="small" onClick={() => setOpenDeleteModal(true)}>
           <DeleteOutline />
         </IconButton>
       </Box>
@@ -124,62 +141,37 @@ const ColumnItem = ({
         sx={{
           height: (theme) => theme.heightVariants.listFooterHeight,
           display: "flex",
-          flexDirection: "column",
         }}
       >
-        {isAddingCard ? (
-          <Box sx={{ px: 1, pb: 1 }}>
-            <TextField
-              placeholder="Enter card title..."
-              value={newCardTitle}
-              onChange={(e) => setNewCardTitle(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleAddCard();
-                if (e.key === "Escape") {
-                  setIsAddingCard(false);
-                  setNewCardTitle("");
-                }
-              }}
-              size="small"
-              fullWidth
-              autoFocus
-            />
-            <Box sx={{ display: "flex", alignItems: "center", mt: 1, gap: 1 }}>
-              <Button
-                variant="contained"
-                size="small"
-                onClick={handleAddCard}
-                disabled={!newCardTitle.trim()}
-              >
-                Add card
-              </Button>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  setIsAddingCard(false);
-                  setNewCardTitle("");
-                }}
-              >
-                <CloseRounded />
-              </IconButton>
-            </Box>
-          </Box>
-        ) : (
-          <Button
-            startIcon={<Add />}
-            sx={{
-              justifyContent: "flex-start",
-              color: "text.secondary",
-              py: 1,
-              px: 2,
-            }}
-            fullWidth
-            onClick={() => setIsAddingCard(true)}
-          >
-            Add a card
-          </Button>
-        )}
+        <Button
+          startIcon={<Add />}
+          sx={{
+            justifyContent: "flex-start",
+            color: "text.secondary",
+            py: 1,
+            px: 2,
+          }}
+          fullWidth
+          onClick={() => setIsAddingCard(true)}
+        >
+          Add a card
+        </Button>
       </Box>
+
+      <CardCreationForm
+        open={isAddingCard}
+        onClose={() => setIsAddingCard(false)}
+        onSubmit={handleAddCard}
+      />
+
+      {/* Delete List Confirmation Modal */}
+      <ConfirmationModal
+        open={openDeleteModal}
+        title="Delete list"
+        message="Are you sure you want to delete this list? All tasks within it will be lost."
+        onConfirm={handleDeleteList}
+        onCancel={() => setOpenDeleteModal(false)}
+      />
     </Paper>
   );
 };

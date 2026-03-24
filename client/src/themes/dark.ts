@@ -42,16 +42,63 @@ const darkTheme = createTheme({
   },
   palette: {
     mode: "dark",
-    primary: {
-      main: "#2196f3", //"#5893df",
+      primary: {
+      light: "#e3f2fd",
+      main: "#2196f3",
+      dark: "#1e88e5",
+      200: "#90caf9",
+      800: "#1565c0",
     },
     secondary: {
-      main: "#673ab7", //"#2ec5d3",
+      light: "#d1c4e9",
+      main: "#7c4dff",
+      dark: "#651fff",
+      200: "#b39ddb",
+      800: "#6200ea",
     },
     background: {
-      default: "#1a223f", //"#192231",
-      paper: "#111936", //"#24344d",
+      default: "#111936",
+      paper: "#212946",
     },
+    success: {
+      light: "#b9f6ca",
+      main: "#00e676",
+      dark: "#00c853",
+      200: "#69f0ae",
+    },
+    error: {
+      light: "#ef9a9a",
+      main: "#f44336",
+      dark: "#c62828",
+    },
+    warning: {
+      light: "#fff8e1",
+      main: "#ffe57f",
+      dark: "#ffc107",
+    },
+    grey: {
+      50: "#f8fafc",
+      100: "#eef2f6",
+      500: "#8492c4",
+      600: "#d7dcec",
+      700: "#bdc8f0",
+      900: "#bdc8f0",
+    },
+    text: {
+      primary: "#bdc8f0",
+      secondary: "#8492c4",
+      disabled: "#ffffff80"
+    },
+    // primary: {
+    //   main: "#2196f3", //"#5893df",
+    // },
+    // secondary: {
+    //   main: "#673ab7", //"#2ec5d3",
+    // },
+    // background: {
+    //   default: "#1a223f", //"#192231",
+    //   paper: "#111936", //"#24344d",
+    // },
   },
   typography: {
     fontSize: 13,
