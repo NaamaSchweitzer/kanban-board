@@ -9,6 +9,7 @@ import {
 import { DeleteOutline } from "@mui/icons-material";
 import type { Card, Id } from "../types/kanban";
 import ConfirmationModal from "./ConfirmationModal";
+import ExpandedCard from "./ExpandedCard";
 import { useState } from "react";
 
 interface CardItemProps {
@@ -24,13 +25,16 @@ interface CardItemProps {
 const CardItem = ({
   card,
   isDragging = false,
+  onUpdateCard,
   onDeleteCard,
 }: CardItemProps) => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [openExpanded, setOpenExpanded] = useState(false);
 
   const handleDelete = () => {
     onDeleteCard?.(card._id, card.columnId);
     setOpenDeleteModal(false);
+    setOpenExpanded(false);
   };
 
   return (
@@ -39,7 +43,7 @@ const CardItem = ({
         elevation={3}
         sx={{ mb: 1, opacity: isDragging ? 0.5 : undefined, cursor: "grab" }}
       >
-        <CardActionArea>
+        <CardActionArea onClick={() => setOpenExpanded(true)}>
           <CardContent
             sx={{
               display: "flex",
@@ -75,6 +79,17 @@ const CardItem = ({
         onConfirm={handleDelete}
         onCancel={() => setOpenDeleteModal(false)}
       />
+
+      {/* Expanded Card Drawer */}
+      {onUpdateCard && openExpanded && (
+        <ExpandedCard
+          card={card}
+          open={openExpanded}
+          onClose={() => setOpenExpanded(false)}
+          onUpdateCard={onUpdateCard}
+          onDeleteCard={() => setOpenDeleteModal(true)}
+        />
+      )}
     </>
   );
 };
