@@ -1,3 +1,4 @@
+import { useBoard } from "../hooks/useBoard";
 import Board from "./Board";
 import BoardMenuBar from "./BoardMenuBar";
 
@@ -6,10 +7,15 @@ interface BoardWrapperProps {
 }
 
 const BoardWrapper = ({ boardId }: BoardWrapperProps) => {
+  const board = useBoard(boardId);
+
   return (
     <>
-      <BoardMenuBar boardId={boardId} />
-      <Board boardId={boardId} />
+      <BoardMenuBar
+        boardState={board.boardState}
+        onUpdateBoard={board.updateBoard}
+      />
+      <Board board={board} />
     </>
   );
 };

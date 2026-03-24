@@ -13,17 +13,17 @@ import {
 } from "@dnd-kit/sortable";
 import { Box, Stack } from "@mui/material";
 import { createPortal } from "react-dom";
-import { useBoard } from "../hooks/useBoard";
+import type { useBoard } from "../hooks/useBoard";
 import SortableColumn from "./SortableColumn";
 import CardItem from "./Card";
 import ColumnItem from "./Column";
 import AddNewColumn from "./AddNewColumn";
 
 interface BoardProps {
-  boardId: string;
+  board: ReturnType<typeof useBoard>;
 }
 
-const Board = ({ boardId }: BoardProps) => {
+const Board = ({ board }: BoardProps) => {
   const {
     boardState,
     activeCard,
@@ -37,7 +37,7 @@ const Board = ({ boardId }: BoardProps) => {
     createCard,
     updateCard,
     deleteCard,
-  } = useBoard(boardId);
+  } = board;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -47,8 +47,8 @@ const Board = ({ boardId }: BoardProps) => {
 
   if (!boardState) return <div>Loading...</div>;
 
-  const { board, columns, cards } = boardState;
-  const orderedColumns = board.columnIds.map((id) => columns[id]);
+  const { board: boardData, columns, cards } = boardState;
+  const orderedColumns = boardData.columnIds.map((id) => columns[id]);
 
   return (
     <Box
@@ -77,7 +77,7 @@ const Board = ({ boardId }: BoardProps) => {
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            items={board.columnIds}
+            items={boardData.columnIds}
             strategy={horizontalListSortingStrategy}
           >
             {orderedColumns.map((col) => (

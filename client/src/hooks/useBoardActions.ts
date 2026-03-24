@@ -6,6 +6,22 @@ export function useBoardActions(
   boardId: string,
   setBoardState: Dispatch<SetStateAction<BoardState | null>>,
 ) {
+  // ====================== BOARD ======================
+
+  const updateBoard = useCallback(
+    async (data: { name?: string; description?: string }) => {
+      const updated = await api.updateBoard(boardId, data);
+      setBoardState((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          board: { ...prev.board, ...updated },
+        };
+      });
+    },
+    [boardId, setBoardState],
+  );
+
   // ====================== COLUMNS ======================
 
   const createColumn = useCallback(
@@ -149,6 +165,7 @@ export function useBoardActions(
   );
 
   return {
+    updateBoard,
     createColumn,
     updateColumn,
     deleteColumn,
