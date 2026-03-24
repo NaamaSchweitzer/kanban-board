@@ -26,6 +26,7 @@ export function useBoard(boardId: string) {
     activeCardRef.current = activeCard;
   }, [activeCard]);
 
+  // Initial board fetch — local state takes over for DnD/CRUD after load
   useEffect(() => {
     api
       .fetchBoard(boardId)

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -11,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { DeleteOutline } from "@mui/icons-material";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as api from "../../api/kanban";
 import type { Board } from "../../types/kanban";
 import { useAuth } from "../../contexts/AuthContext";
@@ -19,33 +20,50 @@ import ConfirmationModal from "../../components/ConfirmationModal";
 
 const Home = () => {
   const { user } = useAuth();
-  const [boards, setBoards] = useState<Board[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [boardToDelete, setBoardToDelete] = useState<Board | null>(null);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (!user) return;
-    api.listBoards(user._id).then(setBoards).catch(console.error);
-  }, [user]);
+  const {
+    data: boards = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["boards", user?._id],
+    queryFn: () => api.listBoards(user!._id),
+    enabled: !!user,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data: { name: string; description: string }) =>
+      api.createBoard({ ...data, ownerId: user!._id }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["boards", user?._id] }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (boardId: string) => api.deleteBoard(boardId),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["boards", user?._id] }),
+  });
 
   const handleCreateBoard = async (name: string, description: string) => {
-    if (!user) return;
-    const created = await api.createBoard({
-      name,
-      description,
-      ownerId: user._id,
-    });
-    // addBoard
-    setBoards((prev) => [...prev, created]);
+    await createMutation.mutateAsync({ name, description });
+    setIsCreating(false);
   };
 
   const handleDeleteBoard = async () => {
     if (!boardToDelete) return;
-    await api.deleteBoard(boardToDelete._id);
-    setBoards((prev) => prev.filter((b) => b._id !== boardToDelete._id));
+    await deleteMutation.mutateAsync(boardToDelete._id as string);
     setBoardToDelete(null);
   };
+
+  if (isLoading)
+    return <Typography sx={{ p: 4 }}>Loading boards...</Typography>;
+  if (isError)
+    return <Typography sx={{ p: 4 }}>Error: {error.message}</Typography>;
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -78,7 +96,7 @@ const Home = () => {
           gap: 2,
         }}
       >
-        {boards.map((board) => (
+        {boards.map((board: Board) => (
           <Card key={String(board._id)} elevation={2}>
             <CardActionArea onClick={() => navigate(`/dashboard/${board._id}`)}>
               <CardContent

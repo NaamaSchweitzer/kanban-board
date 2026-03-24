@@ -1,4 +1,5 @@
 import { useCallback, type Dispatch, type SetStateAction } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import * as api from "../api/kanban";
 import type { BoardState, Id } from "../types/kanban";
 
@@ -6,6 +7,8 @@ export function useBoardActions(
   boardId: string,
   setBoardState: Dispatch<SetStateAction<BoardState | null>>,
 ) {
+  const queryClient = useQueryClient();
+
   // ====================== BOARD ======================
 
   const updateBoard = useCallback(
@@ -18,8 +21,10 @@ export function useBoardActions(
           board: { ...prev.board, ...updated },
         };
       });
+      // Invalidate boards list so boards list on Home page shows updated name
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
     },
-    [boardId, setBoardState],
+    [boardId, setBoardState, queryClient],
   );
 
   // ====================== COLUMNS ======================
