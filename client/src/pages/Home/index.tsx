@@ -15,11 +15,13 @@ import * as api from "../../api/kanban";
 import type { Board } from "../../types/kanban";
 import { useAuth } from "../../contexts/AuthContext";
 import CreateBoardModal from "../../components/CreateBoardModal";
+import ConfirmationModal from "../../components/ConfirmationModal";
 
 const Home = () => {
   const { user } = useAuth();
   const [boards, setBoards] = useState<Board[]>([]);
   const [isCreating, setIsCreating] = useState(false);
+  const [boardToDelete, setBoardToDelete] = useState<Board | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,10 +40,11 @@ const Home = () => {
     setBoards((prev) => [...prev, created]);
   };
 
-  const handleDeleteBoard = async (boardId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    await api.deleteBoard(boardId);
-    setBoards((prev) => prev.filter((b) => b._id !== boardId));
+  const handleDeleteBoard = async () => {
+    if (!boardToDelete) return;
+    await api.deleteBoard(boardToDelete._id);
+    setBoards((prev) => prev.filter((b) => b._id !== boardToDelete._id));
+    setBoardToDelete(null);
   };
 
   return (
@@ -95,7 +98,10 @@ const Home = () => {
                 </Box>
                 <IconButton
                   size="small"
-                  onClick={(e) => handleDeleteBoard(board._id as string, e)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setBoardToDelete(board);
+                  }}
                 >
                   <DeleteOutline fontSize="small" />
                 </IconButton>
@@ -117,6 +123,15 @@ const Home = () => {
         open={isCreating}
         onClose={() => setIsCreating(false)}
         onCreate={handleCreateBoard}
+      />
+
+      {/* Delete Board Confirmation Modal */}
+      <ConfirmationModal
+        open={!!boardToDelete}
+        title="Delete board"
+        message={`Are you sure you want to delete "${boardToDelete?.name}"? All columns and cards within it will be lost.`}
+        onConfirm={handleDeleteBoard}
+        onCancel={() => setBoardToDelete(null)}
       />
     </Container>
   );
