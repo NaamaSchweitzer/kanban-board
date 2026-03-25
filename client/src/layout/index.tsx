@@ -1,12 +1,9 @@
-import { Box, Container } from "@mui/material";
-import { Outlet, useLocation } from "react-router-dom";
+import { Box } from "@mui/material";
+import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 const Layout = () => {
-  const location = useLocation();
-  const isBoardPage = location.pathname.startsWith("/dashboard");
-
   return (
     <Box
       sx={{
@@ -17,14 +14,19 @@ const Layout = () => {
     >
       <Navbar />
 
-      <Box sx={{ flex: 1 }}>
-        {/* Only page content is constrained */}
-        <Container sx={{ py: 3 }}>
-          <Outlet />
-        </Container>
+      {/* Main content — fills remaining space */}
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "auto",
+        }}
+      >
+        <Outlet />
       </Box>
 
-      {!isBoardPage && <Footer />}
+      <Footer />
     </Box>
   );
 };

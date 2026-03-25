@@ -1,5 +1,5 @@
 import type { Id, ReorderCardsPayload } from "../types/kanban";
-import { BASE, jsonHeaders } from "./config";
+import { BASE, jsonHeaders, parseError } from "./config";
 
 export const createColumn = async (data: { title: string; boardId: Id }) => {
   const response = await fetch(`${BASE}/columns`, {
@@ -7,7 +7,7 @@ export const createColumn = async (data: { title: string; boardId: Id }) => {
     headers: jsonHeaders,
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error("Failed to create column");
+  if (!response.ok) await parseError(response, "Failed to create column");
   return response.json();
 };
 
@@ -20,7 +20,7 @@ export const updateColumn = async (
     headers: jsonHeaders,
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error("Failed to update column");
+  if (!response.ok) await parseError(response, "Failed to update column");
   return response.json();
 };
 
@@ -28,7 +28,7 @@ export const deleteColumn = async (columnId: Id) => {
   const response = await fetch(`${BASE}/columns/${columnId}`, {
     method: "DELETE",
   });
-  if (!response.ok) throw new Error("Failed to delete column");
+  if (!response.ok) await parseError(response, "Failed to delete column");
   return response.json();
 };
 
@@ -41,6 +41,6 @@ export const reorderCards = async ({
     headers: jsonHeaders,
     body: JSON.stringify({ cardIds }),
   });
-  if (!response.ok) throw new Error("Failed to reorder cards");
+  if (!response.ok) await parseError(response, "Failed to reorder cards");
   return response.json();
 };

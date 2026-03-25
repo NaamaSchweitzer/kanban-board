@@ -51,21 +51,14 @@ const Board = ({ board }: BoardProps) => {
   const orderedColumns = boardData.columnIds.map((id) => columns[id]);
 
   return (
-    <Box
-      sx={{
-        px: 2,
-        width: "100%",
-        height: (theme) => theme.heightVariants.boardContentHeight,
-        overflowX: "auto",
-        overflowY: "hidden",
-      }}
-    >
+    <Box sx={{ p: 1, px: 2, flex: 1, overflow: "auto" }}>
       <Stack
         direction="row"
         spacing={2}
         sx={{
           alignItems: "flex-start",
           justifyContent: "flex-start",
+          height: "100%",
         }}
       >
         <DndContext
@@ -103,11 +96,9 @@ const Board = ({ board }: BoardProps) => {
             </DragOverlay>,
             document.body,
           )}
-
         </DndContext>
 
         <AddNewColumn onCreateColumn={createColumn} />
-
       </Stack>
     </Box>
   );

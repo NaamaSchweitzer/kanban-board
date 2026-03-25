@@ -1,5 +1,5 @@
 import type { Id, MoveCardPayload } from "../types/kanban";
-import { BASE, jsonHeaders } from "./config";
+import { BASE, jsonHeaders, parseError } from "./config";
 
 export const createCard = async (data: {
   boardId: Id;
@@ -12,7 +12,7 @@ export const createCard = async (data: {
     headers: jsonHeaders,
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error("Failed to create card");
+  if (!response.ok) await parseError(response, "Failed to create card");
   return response.json();
 };
 
@@ -25,7 +25,7 @@ export const updateCard = async (
     headers: jsonHeaders,
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error("Failed to update card");
+  if (!response.ok) await parseError(response, "Failed to update card");
   return response.json();
 };
 
@@ -33,7 +33,7 @@ export const deleteCard = async (cardId: Id) => {
   const response = await fetch(`${BASE}/cards/${cardId}`, {
     method: "DELETE",
   });
-  if (!response.ok) throw new Error("Failed to delete card");
+  if (!response.ok) await parseError(response, "Failed to delete card");
   return response.json();
 };
 
@@ -54,6 +54,6 @@ export const moveCard = async ({
       destinationCardIds,
     }),
   });
-  if (!response.ok) throw new Error("Failed to move card");
+  if (!response.ok) await parseError(response, "Failed to move card");
   return response.json();
 };

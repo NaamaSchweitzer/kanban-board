@@ -2,11 +2,11 @@ import {
   createContext,
   useState,
   useContext,
-  useCallback,
   useEffect,
   type PropsWithChildren,
 } from "react";
 import * as authApi from "../api/auth";
+import * as usersApi from "../api/users";
 import type { User } from "../types/auth";
 
 interface AuthContextProps {
@@ -15,8 +15,15 @@ interface AuthContextProps {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string) => Promise<void>;
+  register: (
+    username: string,
+    email: string,
+    password: string,
+  ) => Promise<void>;
   logout: () => void;
+  updateUser: (data: { username?: string; email?: string }) => Promise<void>;
+  deleteUser: () => Promise<void>;
+  changePassword: (oldPassword: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -32,6 +39,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     const storedUser = localStorage.getItem("user");
 
     if (storedToken && storedUser) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
     }
@@ -46,25 +54,48 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     localStorage.setItem("user", JSON.stringify(userData));
   };
 
-  const login = useCallback(async (email: string, password: string) => {
-    const result = await authApi.login({ email, password });
-    saveSession(result.user, result.token);
-  }, []);
-
-  const register = useCallback(
-    async (username: string, email: string, password: string) => {
-      const result = await authApi.register({ username, email, password });
-      saveSession(result.user, result.token);
-    },
-    [],
-  );
-
-  const logout = useCallback(() => {
+  const clearSession = () => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-  }, []);
+  };
+
+  const login = async (email: string, password: string) => {
+    const result = await authApi.login({ email, password });
+    saveSession(result.user, result.token);
+  };
+
+  const register = async (
+    username: string,
+    email: string,
+    password: string,
+  ) => {
+    const result = await authApi.register({ username, email, password });
+    saveSession(result.user, result.token);
+  };
+
+  const logout = () => {
+    clearSession();
+  };
+
+  const updateUser = async (data: { username?: string; email?: string }) => {
+    if (!user) return;
+    const updated = await usersApi.updateUser(user._id, data);
+    setUser(updated);
+    localStorage.setItem("user", JSON.stringify(updated));
+  };
+
+  const deleteUser = async () => {
+    if (!user) return;
+    await usersApi.deleteUser(user._id);
+    clearSession();
+  };
+
+  const changePassword = async (oldPassword: string, newPassword: string) => {
+    if (!user) return;
+    await usersApi.changePassword(user._id, { oldPassword, newPassword });
+  };
 
   return (
     <AuthContext.Provider
@@ -76,6 +107,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         login,
         register,
         logout,
+        updateUser,
+        deleteUser,
+        changePassword,
       }}
     >
       {children}

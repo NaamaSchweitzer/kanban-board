@@ -24,10 +24,10 @@ const SettingsMenu = () => {
   return (
     <Box
       sx={{
-        height: (theme) =>
-          `calc(100vh - ${theme.heightVariants.navBarHeight} - ${theme.heightVariants.footerHeight})`,
-        py: 4,
-        px: 10,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        mb: 3,
       }}
     >
       <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ ml: 3 }}>
