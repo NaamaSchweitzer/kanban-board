@@ -7,6 +7,7 @@ import Login from "../pages/Login";
 import DashBoard from "../pages/DashBoard";
 import Layout from "../layout";
 import ProtectedRoute from "../components/ProtectedRoute";
+import NotFoundPage from "../pages/NotFoundPage";
 
 export const router = createBrowserRouter([
   // Public routes (with layout)
@@ -30,4 +31,7 @@ export const router = createBrowserRouter([
       },
     ],
   },
+
+  // Default
+  { path: "*", element: <NotFoundPage /> },
 ]);
