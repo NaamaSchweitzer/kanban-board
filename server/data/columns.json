@@ -1,23 +1,23 @@
 [
   {
-    "_id": "65c0f3000000000000000001",
-    "boardId": "65c0f2000000000000000001",
     "title": "To Do",
-    "cardIds": [
-      "65c0f4000000000000000001",
-      "65c0f4000000000000000002"
+    "cards": [
+      {
+        "title": "Task A",
+        "description": "First task",
+        "dueDate": null
+      },
+      {
+        "title": "Task B",
+        "description": null,
+        "dueDate": null
+      }
     ]
   },
   {
-    "_id": "65c0f3000000000000000002",
-    "boardId": "65c0f2000000000000000001",
-    "title": "In Progress",
-    "cardIds": []
+    "title": "In Progress"
   },
   {
-    "_id": "65c0f3000000000000000003",
-    "boardId": "65c0f2000000000000000001",
-    "title": "Done",
-    "cardIds": []
+    "title": "Done"
   }
 ]

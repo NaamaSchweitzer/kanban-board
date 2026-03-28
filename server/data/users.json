@@ -1,8 +1,7 @@
 [
   {
-    "_id": "65c0f1000000000000000001",
     "username": "user1",
     "email": "user1@example.com",
-    "password": "demo_hash"
+    "password": "1234"
   }
 ]
