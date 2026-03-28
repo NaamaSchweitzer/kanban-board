@@ -49,12 +49,17 @@ export const getBoardById = async (req, res) => {
 
 export const createBoard = async (req, res) => {
   try {
-    const { name, description = null, ownerId } = req.body;
+    const { name, description = null, color = null, ownerId } = req.body;
 
     if (!name || !ownerId)
       return serverResponse(res, 400, boardMessages.createRequiredFields);
 
-    const result = await createBoardService({ name, description, ownerId });
+    const result = await createBoardService({
+      name,
+      description,
+      color,
+      ownerId,
+    });
 
     if (!result.ok) {
       return serverResponse(res, result.status, result.message);
@@ -70,9 +75,9 @@ export const createBoard = async (req, res) => {
 export const updateBoard = async (req, res) => {
   try {
     const { boardId } = req.params;
-    const { name, description } = req.body;
+    const { name, description, color } = req.body;
 
-    const allowed = new Set(["name", "description"]);
+    const allowed = new Set(["name", "description", "color"]);
 
     const incomingKeys = Object.keys(req.body);
     const invalidKeys = incomingKeys.filter((k) => !allowed.has(k));
@@ -89,6 +94,7 @@ export const updateBoard = async (req, res) => {
       boardId,
       name,
       description,
+      color,
     });
 
     if (!result.ok) {

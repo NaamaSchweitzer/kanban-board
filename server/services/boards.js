@@ -41,6 +41,7 @@ export const getBoardByIdService = async (boardId) => {
 export const createBoardService = async ({
   name,
   description = null,
+  color = null,
   ownerId,
 }) => {
   if (!isValidObjectId(ownerId)) {
@@ -52,11 +53,16 @@ export const createBoardService = async ({
     return failure(404, boardMessages.ownerNotFound);
   }
 
-  const board = await Board.create({ name, description, ownerId });
+  const board = await Board.create({ name, description, color, ownerId });
   return success(board, 201);
 };
 
-export const updateBoardService = async ({ boardId, name, description }) => {
+export const updateBoardService = async ({
+  boardId,
+  name,
+  description,
+  color,
+}) => {
   if (!isValidObjectId(boardId)) {
     return failure(400, boardMessages.invalidId);
   }
@@ -65,6 +71,7 @@ export const updateBoardService = async ({ boardId, name, description }) => {
 
   if (name !== undefined) updates.name = name;
   if (description !== undefined) updates.description = description;
+  if (color !== undefined) updates.color = color;
 
   if (Object.keys(updates).length === 0) {
     return failure(400, boardMessages.noFieldsToUpdate);
