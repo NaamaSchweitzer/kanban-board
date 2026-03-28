@@ -96,6 +96,7 @@ export const updateCardService = async ({
   title,
   description,
   dueDate,
+  tags,
 }) => {
   if (!isValidObjectId(cardId)) {
     return failure(400, cardMessages.invalidId);
@@ -106,6 +107,7 @@ export const updateCardService = async ({
   if (title !== undefined) updates.title = title;
   if (description !== undefined) updates.description = description;
   if (dueDate !== undefined) updates.dueDate = dueDate;
+  if (tags !== undefined) updates.tags = tags;
 
   if (Object.keys(updates).length === 0) {
     return failure(400, cardMessages.noFieldsToUpdate);

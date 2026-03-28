@@ -18,6 +18,7 @@ const cardSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     description: { type: String, default: null },
     dueDate: { type: String, default: null },
+    tags: [{ label: { type: String, trim: true }, color: { type: String } }],
 
     // assigneeId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
   },
