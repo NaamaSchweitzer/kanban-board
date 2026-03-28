@@ -6,6 +6,7 @@ export interface Board {
   _id: Id;
   name: string;
   description: string | null;
+  color: string | null;
   ownerId: Id;
   columnIds: Id[];
   createdAt: string;

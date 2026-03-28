@@ -9,6 +9,7 @@ import {
   Container,
   IconButton,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { DeleteOutline } from "@mui/icons-material";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -24,6 +25,8 @@ const Home = () => {
   const [boardToDelete, setBoardToDelete] = useState<Board | null>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
 
   const {
     data: boards = [],
@@ -37,7 +40,7 @@ const Home = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: { name: string; description: string }) =>
+    mutationFn: (data: { name: string; description: string; color: string }) =>
       api.createBoard({ ...data, ownerId: user!._id }),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["boards", user?._id] }),
@@ -49,8 +52,12 @@ const Home = () => {
       queryClient.invalidateQueries({ queryKey: ["boards", user?._id] }),
   });
 
-  const handleCreateBoard = async (name: string, description: string) => {
-    await createMutation.mutateAsync({ name, description });
+  const handleCreateBoard = async (
+    name: string,
+    description: string,
+    color: string,
+  ) => {
+    await createMutation.mutateAsync({ name, description, color });
     setIsCreating(false);
   };
 
@@ -88,6 +95,7 @@ const Home = () => {
         </Button>
       </Box>
 
+      {/* Boards List */}
       {/* <Grid size={{ xs: 12 }}> */}
       <Box
         sx={{
@@ -97,7 +105,15 @@ const Home = () => {
         }}
       >
         {boards.map((board: Board) => (
-          <Card key={String(board._id)} elevation={2}>
+          /* Board Card */
+          <Card
+            key={String(board._id)}
+            elevation={2}
+            sx={{
+              ...(board.color && !isDark && { bgcolor: board.color }),
+              ...(board.color && isDark && { borderLeft: `4px solid ${board.color}` }),
+            }}
+          >
             <CardActionArea onClick={() => navigate(`/dashboard/${board._id}`)}>
               <CardContent
                 sx={{

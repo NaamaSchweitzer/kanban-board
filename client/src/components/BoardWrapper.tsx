@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import { useBoard } from "../hooks/useBoard";
 import Board from "./Board";
 import BoardMenuBar from "./BoardMenuBar";
@@ -9,6 +9,9 @@ interface BoardWrapperProps {
 
 const BoardWrapper = ({ boardId }: BoardWrapperProps) => {
   const board = useBoard(boardId);
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+  const boardColor = board.boardState?.board.color;
 
   return (
     <Box
@@ -17,6 +20,7 @@ const BoardWrapper = ({ boardId }: BoardWrapperProps) => {
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
+        ...(boardColor && !isDark && { bgcolor: boardColor }),
       }}
     >
       <BoardMenuBar

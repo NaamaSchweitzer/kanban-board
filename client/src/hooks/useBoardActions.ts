@@ -12,7 +12,7 @@ export function useBoardActions(
   // ====================== BOARD ======================
 
   const updateBoard = useCallback(
-    async (data: { name?: string; description?: string }) => {
+    async (data: { name?: string; description?: string; color?: string | null }) => {
       const updated = await api.updateBoard(boardId, data);
       setBoardState((prev) => {
         if (!prev) return prev;

@@ -1,18 +1,34 @@
 import { useState } from "react";
-import { TextField, Toolbar, Tooltip, Typography } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Popover,
+  TextField,
+  Toolbar,
+  Tooltip,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import { Palette } from "@mui/icons-material";
 import type { BoardState } from "../types/kanban";
+import ColorPicker from "./ColorPicker";
 
 interface BoardMenuBarProps {
   boardState: BoardState | null;
   onUpdateBoard: (data: {
     name?: string;
     description?: string;
+    color?: string | null;
   }) => Promise<void>;
 }
 
 const BoardMenuBar = ({ boardState, onUpdateBoard }: BoardMenuBarProps) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
+  const [colorAnchor, setColorAnchor] = useState<HTMLElement | null>(null);
 
   if (!boardState) return null;
 
@@ -30,6 +46,12 @@ const BoardMenuBar = ({ boardState, onUpdateBoard }: BoardMenuBarProps) => {
     }
     setIsEditing(false);
   };
+
+  const handleColorChange = (color: string) => {
+    onUpdateBoard({ color: color || null });
+  };
+
+  const fontColor = isDark && board.color ? board.color : undefined;
 
   return (
     <Toolbar
@@ -59,6 +81,7 @@ const BoardMenuBar = ({ boardState, onUpdateBoard }: BoardMenuBarProps) => {
             sx={{
               p: 0.5,
               borderRadius: 1,
+              color: fontColor,
               transition: "background-color 0.2s ease",
               "&:hover": {
                 bgcolor: (theme) => theme.palette.action.hover,
@@ -70,6 +93,32 @@ const BoardMenuBar = ({ boardState, onUpdateBoard }: BoardMenuBarProps) => {
           </Typography>
         </Tooltip>
       )}
+
+      {/* Color Picker Button */}
+      <Box sx={{ ml: 1 }}>
+        <Tooltip title="Board color" arrow>
+          <IconButton
+            size="small"
+            onClick={(e) => setColorAnchor(e.currentTarget)}
+            sx={{ color: fontColor }}
+          >
+            <Palette fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Popover
+          open={Boolean(colorAnchor)}
+          anchorEl={colorAnchor}
+          onClose={() => setColorAnchor(null)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        >
+          <Box sx={{ p: 2, maxWidth: 280 }}>
+            <ColorPicker
+              value={board.color || ""}
+              onChange={handleColorChange}
+            />
+          </Box>
+        </Popover>
+      </Box>
     </Toolbar>
   );
 };

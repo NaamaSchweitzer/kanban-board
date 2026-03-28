@@ -16,6 +16,7 @@ export const listBoards = async (ownerId: string) => {
 export const createBoard = async (data: {
   name: string;
   description?: string;
+  color?: string;
   ownerId: string;
 }) => {
   const response = await fetch(`${BASE}/boards`, {
@@ -29,7 +30,7 @@ export const createBoard = async (data: {
 
 export const updateBoard = async (
   boardId: Id,
-  data: { name?: string; description?: string },
+  data: { name?: string; description?: string; color?: string | null },
 ) => {
   const response = await fetch(`${BASE}/boards/${boardId}`, {
     method: "PUT",

@@ -4,15 +4,18 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useState } from "react";
+import ColorPicker from "./ColorPicker";
 
 interface CreateBoardModalProps {
   open: boolean;
   onClose: () => void;
-  onCreate: (title: string, color: string) => void;
+  onCreate: (title: string, description: string, color: string) => void;
 }
 
 const CreateBoardModal = ({
@@ -22,10 +25,11 @@ const CreateBoardModal = ({
 }: CreateBoardModalProps) => {
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [selectedColor, setSelectedColor] = useState<string>("");
 
   const handleCreate = () => {
     if (name.trim()) {
-      onCreate(name.trim(), description.trim());
+      onCreate(name.trim(), description.trim(), selectedColor);
       handleClose();
     }
   };
@@ -34,6 +38,7 @@ const CreateBoardModal = ({
     onClose();
     setName("");
     setDescription("");
+    setSelectedColor("");
   };
 
   return (
@@ -52,7 +57,6 @@ const CreateBoardModal = ({
             fullWidth
             autoFocus
             required
-            variant="outlined"
             sx={{ mt: 1 }}
           />
 
@@ -64,9 +68,17 @@ const CreateBoardModal = ({
             fullWidth
             multiline
             rows={2}
-            variant="outlined"
             sx={{ mt: 2 }}
           />
+
+          <Divider sx={{ pt: 1 }} />
+
+          {/* Board Color */}
+          <Typography variant="subtitle2" sx={{ pt: 1 }}>
+            Color (Optional)
+          </Typography>
+
+          <ColorPicker value={selectedColor} onChange={setSelectedColor} />
         </Stack>
       </DialogContent>
       <DialogActions>
