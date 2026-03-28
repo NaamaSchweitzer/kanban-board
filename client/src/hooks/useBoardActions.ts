@@ -126,7 +126,12 @@ export function useBoardActions(
   const updateCard = useCallback(
     async (
       cardId: Id,
-      data: { title?: string; description?: string; dueDate?: string | null },
+      data: {
+        title?: string;
+        description?: string;
+        dueDate?: string | null;
+        tags?: { label: string; color: string }[];
+      },
     ) => {
       const updated = await api.updateCard(cardId, data);
       setBoardState((prev) => {

@@ -22,11 +22,17 @@ export interface Column {
   updatedAt: string;
 }
 
+export interface Tag {
+  label: string;
+  color: string;
+}
+
 export interface Card {
   _id: Id;
   title: string;
   description: string | null;
   dueDate: string | null;
+  tags: Tag[];
   columnId: Id;
   boardId: Id;
   createdAt: string;

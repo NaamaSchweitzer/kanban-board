@@ -18,7 +18,12 @@ export const createCard = async (data: {
 
 export const updateCard = async (
   cardId: Id,
-  data: { title?: string; description?: string; dueDate?: string | null },
+  data: {
+    title?: string;
+    description?: string;
+    dueDate?: string | null;
+    tags?: { label: string; color: string }[];
+  },
 ) => {
   const response = await fetch(`${BASE}/cards/${cardId}`, {
     method: "PUT",
