@@ -6,6 +6,7 @@ import { User } from "../models/User.js";
 import { Board } from "../models/Board.js";
 import { Column } from "../models/Column.js";
 import { Card } from "../models/Card.js";
+import { registerUserService } from "../services/users.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(__dirname, "..", "data");
@@ -30,8 +31,12 @@ export const resetDB = async (req, res) => {
       Card.deleteMany({}),
     ]);
 
-    // insert users
-    const insertedUsers = await User.insertMany(userSeeds);
+    // register users (hashes passwords via registerUserService)
+    const insertedUsers = [];
+    for (const userSeed of userSeeds) {
+      const result = await registerUserService(userSeed);
+      insertedUsers.push(result.data.user);
+    }
     const demoUserId = insertedUsers[0]._id;
 
     // insert boards, link to real user ID (empty columnIds for now)
