@@ -109,9 +109,9 @@ export const createCard = async (req, res) => {
 export const updateCard = async (req, res) => {
   try {
     const { cardId } = req.params;
-    const { title, description, dueDate, tags, assigneeId } = req.body;
+    const { title, description, dueDate, tags, assignee } = req.body;
 
-    const allowed = new Set(["title", "description", "dueDate", "tags", "assigneeId"]);
+    const allowed = new Set(["title", "description", "dueDate", "tags", "assignee"]);
 
     const incomingKeys = Object.keys(req.body);
     const invalidKeys = incomingKeys.filter((k) => !allowed.has(k));
@@ -130,7 +130,7 @@ export const updateCard = async (req, res) => {
       description,
       dueDate,
       tags,
-      assigneeId,
+      assignee,
     });
 
     if (!result.ok) {

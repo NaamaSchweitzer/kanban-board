@@ -44,7 +44,7 @@ export const resetDB = async (req, res) => {
       ...b,
       ownerId: demoUserId,
       columnIds: [],
-      memberIds: [demoUserId],
+      members: [demoUserId],
     }));
     const insertedBoards = await Board.insertMany(boardDocs);
     const demoBoardId = insertedBoards[0]._id;

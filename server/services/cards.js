@@ -98,7 +98,7 @@ export const updateCardService = async ({
   description,
   dueDate,
   tags,
-  assigneeId,
+  assignee,
 }) => {
   if (!isValidObjectId(cardId)) {
     return failure(400, cardMessages.invalidId);
@@ -106,21 +106,21 @@ export const updateCardService = async ({
 
   // validate assignee is:
   // (1) valid user and (2) member of the card's board
-  if (assigneeId !== undefined && assigneeId !== null) {
-    if (!isValidObjectId(assigneeId)) {
+  if (assignee !== undefined && assignee !== null) {
+    if (!isValidObjectId(assignee)) {
       return failure(400, userMessages.invalidId);
     }
     const card = await Card.findById(cardId);
     if (!card) return failure(404, cardMessages.notFound);
 
     const board = await Board.findById(card.boardId);
-    if (!board.memberIds.some((id) => id.toString() === assigneeId)) {
+    if (!board.members.some((id) => id.toString() === assignee)) {
       return failure(400, boardMessages.assigneeNotMember);
     }
   }
 
   // better method if changing signature to recieve data:
-  // const allowed = ["title", "description", "dueDate", "tags", "assigneeId"];
+  // const allowed = ["title", "description", "dueDate", "tags", "assignee"];
   // const updates = Object.fromEntries(
   //   allowed
   //     .filter((key) => data[key] !== undefined)
@@ -133,7 +133,7 @@ export const updateCardService = async ({
   if (description !== undefined) updates.description = description;
   if (dueDate !== undefined) updates.dueDate = dueDate;
   if (tags !== undefined) updates.tags = tags;
-  if (assigneeId !== undefined) updates.assigneeId = assigneeId;
+  if (assignee !== undefined) updates.assignee = assignee;
 
   if (Object.keys(updates).length === 0) {
     return failure(400, cardMessages.noFieldsToUpdate);
@@ -141,7 +141,7 @@ export const updateCardService = async ({
 
   const updated = await Card.findByIdAndUpdate(cardId, updates, {
     new: true,
-  }).populate("assigneeId", "username email");
+  }).populate("assignee", "username email");
   if (!updated) {
     return failure(404, cardMessages.notFound);
   }

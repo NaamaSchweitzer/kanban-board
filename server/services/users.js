@@ -115,12 +115,12 @@ export const deleteUserService = async (userId) => {
 
   // remove user from boards they're a member of (not owner)
   await Board.updateMany(
-    { memberIds: userId },
-    { $pull: { memberIds: userId } },
+    { members: userId },
+    { $pull: { members: userId } },
   );
 
   // unassign from all cards on other boards (not owned by user)
-  await Card.updateMany({ assigneeId: userId }, { $set: { assigneeId: null } });
+  await Card.updateMany({ assignee: userId }, { $set: { assignee: null } });
 
   return success(deleted);
 };

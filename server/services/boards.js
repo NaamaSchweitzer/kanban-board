@@ -23,14 +23,14 @@ export const getBoardByIdService = async (boardId) => {
   if (!isValidObjectId(boardId)) return failure(400, boardMessages.invalidId);
 
   const board = await Board.findById(boardId).populate(
-    "memberIds",
+    "members",
     "username email",
   );
   if (!board) return failure(404, boardMessages.notFound);
 
   const columns = await Column.find({ boardId });
   const cards = await Card.find({ boardId }).populate(
-    "assigneeId",
+    "assignee",
     "username email",
   );
 
@@ -55,7 +55,7 @@ export const createBoardService = async ({
     description,
     color,
     ownerId,
-    memberIds: [ownerId],
+    members: [ownerId],
   });
 
   return success(board, 201);
@@ -123,14 +123,14 @@ export const addMemberService = async (boardId, userId) => {
   const board = await Board.findById(boardId);
   if (!board) return failure(404, boardMessages.notFound);
 
-  const isBoardMember = board.memberIds.some((id) => id.toString() === userId);
+  const isBoardMember = board.members.some((id) => id.toString() === userId);
   if (isBoardMember) return failure(400, boardMessages.memberAlreadyExists);
 
   const updated = await Board.findByIdAndUpdate(
     boardId,
-    { $push: { memberIds: userId } },
+    { $push: { members: userId } },
     { new: true },
-  ).populate("memberIds", "username email");
+  ).populate("members", "username email");
 
   return success(updated);
 };
@@ -146,19 +146,19 @@ export const removeMemberService = async (boardId, userId) => {
     return failure(400, boardMessages.cannotRemoveOwner);
   }
 
-  const isBoardMember = board.memberIds.some((id) => id.toString() === userId);
+  const isBoardMember = board.members.some((id) => id.toString() === userId);
   if (!isBoardMember) return failure(400, boardMessages.memberNotFound);
 
   const updated = await Board.findByIdAndUpdate(
     boardId,
-    { $pull: { memberIds: userId } },
+    { $pull: { members: userId } },
     { new: true },
-  ).populate("memberIds", "username email");
+  ).populate("members", "username email");
 
   // unassign user from all board cards
   await Card.updateMany(
-    { boardId, assigneeId: userId },
-    { $set: { assigneeId: null } },
+    { boardId, assignee: userId },
+    { $set: { assignee: null } },
   );
 
   return success(updated);

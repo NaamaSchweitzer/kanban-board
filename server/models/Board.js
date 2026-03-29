@@ -15,7 +15,7 @@ const boardSchema = new mongoose.Schema(
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Column" }],
       default: [],
     },
-    memberIds: {
+    members: {
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
       default: [],
     },

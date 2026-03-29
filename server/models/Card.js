@@ -20,7 +20,7 @@ const cardSchema = new mongoose.Schema(
     dueDate: { type: String, default: null },
     tags: [{ label: { type: String, trim: true }, color: { type: String } }],
 
-    assigneeId: {
+    assignee: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null,
