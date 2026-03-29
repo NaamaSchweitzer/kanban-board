@@ -26,6 +26,11 @@ export const boardMessages = {
   invalidOwnerId: "Invalid ownerId",
   ownerNotFound: "Owner not found",
   columnIdsRequired: "columnIds array is required",
+  memberRequired: "userId is required",
+  memberAlreadyExists: "User is already a board member",
+  memberNotFound: "User is not a board member",
+  cannotRemoveOwner: "Cannot remove the board owner",
+  assigneeNotMember: "Assignee must be a board member",
 };
 
 export const columnMessages = {

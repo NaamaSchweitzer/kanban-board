@@ -7,6 +7,8 @@ import {
   listBoardsByOwnerService,
   updateBoardService,
   reorderColumnsService,
+  addMemberService,
+  removeMemberService,
 } from "../services/boards.js";
 
 export const listBoardsByOwner = async (req, res) => {
@@ -143,6 +145,45 @@ export const reorderColumns = async (req, res) => {
     return serverResponse(res, 200, result.data);
   } catch (err) {
     console.error("reorderColumns error:", err);
+    return serverResponse(res, 500, commonMessages.serverError);
+  }
+};
+
+export const addMember = async (req, res) => {
+  try {
+    const { boardId } = req.params;
+    const { userId } = req.body;
+
+    if (!userId) {
+      return serverResponse(res, 400, boardMessages.memberRequired);
+    }
+
+    const result = await addMemberService(boardId, userId);
+
+    if (!result.ok) {
+      return serverResponse(res, result.status, result.message);
+    }
+
+    return serverResponse(res, 200, result.data);
+  } catch (err) {
+    console.error("addMember error:", err);
+    return serverResponse(res, 500, commonMessages.serverError);
+  }
+};
+
+export const removeMember = async (req, res) => {
+  try {
+    const { boardId, userId } = req.params;
+
+    const result = await removeMemberService(boardId, userId);
+
+    if (!result.ok) {
+      return serverResponse(res, result.status, result.message);
+    }
+
+    return serverResponse(res, 200, result.data);
+  } catch (err) {
+    console.error("removeMember error:", err);
     return serverResponse(res, 500, commonMessages.serverError);
   }
 };

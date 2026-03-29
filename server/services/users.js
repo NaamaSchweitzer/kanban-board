@@ -3,6 +3,9 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 import { User } from "../models/User.js";
+import { Board } from "../models/Board.js";
+import { Column } from "../models/Column.js";
+import { Card } from "../models/Card.js";
 import { userMessages } from "../constants/messages.js";
 import { success, failure } from "../utils/serviceResult.js";
 
@@ -95,14 +98,29 @@ export const updateUserService = async (userId, updates) => {
 };
 
 export const deleteUserService = async (userId) => {
-  if (!isValidObjectId(userId)) {
-    return failure(400, userMessages.invalidId);
-  }
+  if (!isValidObjectId(userId)) return failure(400, userMessages.invalidId);
 
   const deleted = await User.findByIdAndDelete(userId);
-  if (!deleted) {
-    return failure(404, userMessages.notFound);
+  if (!deleted) return failure(404, userMessages.notFound);
+
+  // cascade delete all boards owned by this user (and their columns/cards)
+  const ownedBoards = await Board.find({ ownerId: userId }, "_id");
+  const ownedBoardIds = ownedBoards.map((b) => b._id);
+
+  if (ownedBoardIds.length > 0) {
+    await Card.deleteMany({ boardId: { $in: ownedBoardIds } });
+    await Column.deleteMany({ boardId: { $in: ownedBoardIds } });
+    await Board.deleteMany({ _id: { $in: ownedBoardIds } });
   }
+
+  // remove user from boards they're a member of (not owner)
+  await Board.updateMany(
+    { memberIds: userId },
+    { $pull: { memberIds: userId } },
+  );
+
+  // unassign from all cards on other boards (not owned by user)
+  await Card.updateMany({ assigneeId: userId }, { $set: { assigneeId: null } });
 
   return success(deleted);
 };

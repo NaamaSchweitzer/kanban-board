@@ -39,11 +39,12 @@ export const resetDB = async (req, res) => {
     }
     const demoUserId = insertedUsers[0]._id;
 
-    // insert boards, link to real user ID (empty columnIds for now)
+    // insert boards, link to real user ID (empty columnIds for now, owner as first member)
     const boardDocs = boardSeeds.map((b) => ({
       ...b,
       ownerId: demoUserId,
       columnIds: [],
+      memberIds: [demoUserId],
     }));
     const insertedBoards = await Board.insertMany(boardDocs);
     const demoBoardId = insertedBoards[0]._id;

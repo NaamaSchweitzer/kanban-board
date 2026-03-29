@@ -6,11 +6,13 @@ import {
   updateBoard,
   deleteBoard,
   reorderColumns,
+  addMember,
+  removeMember,
 } from "../controllers/boards.js";
 
 const router = Router();
 
-// /boards?ownerId=...
+// POST /api/boards?ownerId=...
 router.get("/", listBoardsByOwner);
 
 router.post("/", createBoard);
@@ -20,6 +22,10 @@ router.delete("/:boardId", deleteBoard);
 
 // column drag & drop
 router.patch("/:boardId/reorder-columns", reorderColumns);
+
+// board members
+router.post("/:boardId/members", addMember);
+router.delete("/:boardId/members/:userId", removeMember);
 
 export default router;
 

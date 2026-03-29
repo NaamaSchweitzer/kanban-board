@@ -3,6 +3,7 @@ import {
   boardMessages,
   cardMessages,
   columnMessages,
+  userMessages,
 } from "../constants/messages.js";
 import { success, failure } from "../utils/serviceResult.js";
 import { Board } from "../models/Board.js";
@@ -85,7 +86,7 @@ export const createCardService = async ({
     dueDate,
   });
 
-  // Append to column's cardIds to register the order
+  // append to column's cardIds to register the order
   await Column.findByIdAndUpdate(columnId, { $push: { cardIds: card._id } });
 
   return success(card, 201);
@@ -97,10 +98,34 @@ export const updateCardService = async ({
   description,
   dueDate,
   tags,
+  assigneeId,
 }) => {
   if (!isValidObjectId(cardId)) {
     return failure(400, cardMessages.invalidId);
   }
+
+  // validate assignee is:
+  // (1) valid user and (2) member of the card's board
+  if (assigneeId !== undefined && assigneeId !== null) {
+    if (!isValidObjectId(assigneeId)) {
+      return failure(400, userMessages.invalidId);
+    }
+    const card = await Card.findById(cardId);
+    if (!card) return failure(404, cardMessages.notFound);
+
+    const board = await Board.findById(card.boardId);
+    if (!board.memberIds.some((id) => id.toString() === assigneeId)) {
+      return failure(400, boardMessages.assigneeNotMember);
+    }
+  }
+
+  // better method if changing signature to recieve data:
+  // const allowed = ["title", "description", "dueDate", "tags", "assigneeId"];
+  // const updates = Object.fromEntries(
+  //   allowed
+  //     .filter((key) => data[key] !== undefined)
+  //     .map((key) => [key, data[key]]),
+  // );
 
   const updates = {};
 
@@ -108,12 +133,15 @@ export const updateCardService = async ({
   if (description !== undefined) updates.description = description;
   if (dueDate !== undefined) updates.dueDate = dueDate;
   if (tags !== undefined) updates.tags = tags;
+  if (assigneeId !== undefined) updates.assigneeId = assigneeId;
 
   if (Object.keys(updates).length === 0) {
     return failure(400, cardMessages.noFieldsToUpdate);
   }
 
-  const updated = await Card.findByIdAndUpdate(cardId, updates, { new: true });
+  const updated = await Card.findByIdAndUpdate(cardId, updates, {
+    new: true,
+  }).populate("assigneeId", "username email");
   if (!updated) {
     return failure(404, cardMessages.notFound);
   }
