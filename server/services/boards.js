@@ -81,7 +81,8 @@ export const updateBoardService = async ({
 
   const updatedBoard = await Board.findByIdAndUpdate(boardId, updates, {
     new: true,
-  });
+  }).populate("members", "username email");
+  
   if (!updatedBoard) return failure(404, boardMessages.notFound);
 
   return success(updatedBoard);
@@ -107,7 +108,8 @@ export const reorderColumnsService = async ({ boardId, columnIds }) => {
     boardId,
     { $set: { columnIds } },
     { new: true },
-  );
+  ).populate("members", "username email");
+  
   if (!board) return failure(404, boardMessages.notFound);
 
   return success(board);
