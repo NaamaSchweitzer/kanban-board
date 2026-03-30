@@ -18,6 +18,12 @@ export const listBoards = async (ownerId: string) => {
   return response.json();
 };
 
+export const listMemberBoards = async (userId: string) => {
+  const response = await fetch(`${BASE}/boards?userId=${userId}`);
+  if (!response.ok) await parseError(response, "Failed to list member boards");
+  return response.json();
+};
+
 export const createBoard = async (data: CreateBoardData) => {
   const response = await fetch(`${BASE}/boards`, {
     method: "POST",
