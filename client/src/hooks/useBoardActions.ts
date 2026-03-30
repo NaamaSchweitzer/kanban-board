@@ -1,7 +1,12 @@
 import { useCallback, type Dispatch, type SetStateAction } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import * as api from "../api/kanban";
-import type { BoardState, Id } from "../types/kanban";
+import type {
+  BoardState,
+  Id,
+  UpdateBoardData,
+  UpdateCardData,
+} from "../types/kanban";
 
 export function useBoardActions(
   boardId: string,
@@ -12,7 +17,7 @@ export function useBoardActions(
   // ====================== BOARD ======================
 
   const updateBoard = useCallback(
-    async (data: { name?: string; description?: string; color?: string | null }) => {
+    async (data: UpdateBoardData) => {
       const updated = await api.updateBoard(boardId, data);
       setBoardState((prev) => {
         if (!prev) return prev;
@@ -22,6 +27,36 @@ export function useBoardActions(
         };
       });
       // Invalidate boards list so boards list on Home page shows updated name
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+    },
+    [boardId, setBoardState, queryClient],
+  );
+
+  const addMember = useCallback(
+    async (userId: string) => {
+      const updated = await api.addMember(boardId, userId);
+      setBoardState((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          board: { ...prev.board, ...updated },
+        };
+      });
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+    },
+    [boardId, setBoardState, queryClient],
+  );
+
+  const removeMember = useCallback(
+    async (userId: string) => {
+      const updated = await api.removeMember(boardId, userId);
+      setBoardState((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          board: { ...prev.board, ...updated },
+        };
+      });
       queryClient.invalidateQueries({ queryKey: ["boards"] });
     },
     [boardId, setBoardState, queryClient],
@@ -124,15 +159,7 @@ export function useBoardActions(
   );
 
   const updateCard = useCallback(
-    async (
-      cardId: Id,
-      data: {
-        title?: string;
-        description?: string;
-        dueDate?: string | null;
-        tags?: { label: string; color: string }[];
-      },
-    ) => {
+    async (cardId: Id, data: UpdateCardData) => {
       const updated = await api.updateCard(cardId, data);
       setBoardState((prev) => {
         if (!prev) return prev;
@@ -176,6 +203,8 @@ export function useBoardActions(
 
   return {
     updateBoard,
+    addMember,
+    removeMember,
     createColumn,
     updateColumn,
     deleteColumn,

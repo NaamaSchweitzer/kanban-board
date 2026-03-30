@@ -1,4 +1,9 @@
-import type { Id, ReorderColumnsPayload } from "../types/kanban";
+import type {
+  CreateBoardData,
+  Id,
+  ReorderColumnsPayload,
+  UpdateBoardData,
+} from "../types/kanban";
 import { BASE, jsonHeaders, parseError } from "./config";
 
 export const fetchBoard = async (boardId: string) => {
@@ -13,12 +18,7 @@ export const listBoards = async (ownerId: string) => {
   return response.json();
 };
 
-export const createBoard = async (data: {
-  name: string;
-  description?: string;
-  color?: string;
-  ownerId: string;
-}) => {
+export const createBoard = async (data: CreateBoardData) => {
   const response = await fetch(`${BASE}/boards`, {
     method: "POST",
     headers: jsonHeaders,
@@ -28,10 +28,7 @@ export const createBoard = async (data: {
   return response.json();
 };
 
-export const updateBoard = async (
-  boardId: Id,
-  data: { name?: string; description?: string; color?: string | null },
-) => {
+export const updateBoard = async (boardId: Id, data: UpdateBoardData) => {
   const response = await fetch(`${BASE}/boards/${boardId}`, {
     method: "PUT",
     headers: jsonHeaders,
@@ -59,5 +56,23 @@ export const reorderColumns = async ({
     body: JSON.stringify({ columnIds }),
   });
   if (!response.ok) await parseError(response, "Failed to reorder columns");
+  return response.json();
+};
+
+export const addMember = async (boardId: Id, userId: string) => {
+  const response = await fetch(`${BASE}/boards/${boardId}/members`, {
+    method: "POST",
+    headers: jsonHeaders,
+    body: JSON.stringify({ userId }),
+  });
+  if (!response.ok) await parseError(response, "Failed to add member");
+  return response.json();
+};
+
+export const removeMember = async (boardId: Id, userId: string) => {
+  const response = await fetch(`${BASE}/boards/${boardId}/members/${userId}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) await parseError(response, "Failed to remove member");
   return response.json();
 };

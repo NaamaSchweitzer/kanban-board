@@ -1,12 +1,12 @@
-import type { Id, MoveCardPayload } from "../types/kanban";
+import type {
+  CreateCardData,
+  Id,
+  MoveCardPayload,
+  UpdateCardData,
+} from "../types/kanban";
 import { BASE, jsonHeaders, parseError } from "./config";
 
-export const createCard = async (data: {
-  boardId: Id;
-  columnId: Id;
-  title: string;
-  description?: string;
-}) => {
+export const createCard = async (data: CreateCardData) => {
   const response = await fetch(`${BASE}/cards`, {
     method: "POST",
     headers: jsonHeaders,
@@ -16,15 +16,7 @@ export const createCard = async (data: {
   return response.json();
 };
 
-export const updateCard = async (
-  cardId: Id,
-  data: {
-    title?: string;
-    description?: string;
-    dueDate?: string | null;
-    tags?: { label: string; color: string }[];
-  },
-) => {
+export const updateCard = async (cardId: Id, data: UpdateCardData) => {
   const response = await fetch(`${BASE}/cards/${cardId}`, {
     method: "PUT",
     headers: jsonHeaders,
