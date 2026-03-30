@@ -1,6 +1,14 @@
 import type { User } from "../types/auth";
 import { BASE, authHeaders, parseError } from "./config";
 
+export const getAllUsers = async (): Promise<User[]> => {
+  const response = await fetch(`${BASE}/users`, {
+    headers: authHeaders(),
+  });
+  if (!response.ok) await parseError(response, "Failed to fetch users");
+  return response.json();
+};
+
 export const getUser = async (userId: string): Promise<User> => {
   const response = await fetch(`${BASE}/users/${userId}`, {
     headers: authHeaders(),
