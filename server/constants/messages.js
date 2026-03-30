@@ -23,6 +23,7 @@ export const boardMessages = {
   noFieldsToUpdate: "No board fields provided for update",
   createRequiredFields: "name and ownerId are required",
   ownerIdQueryRequired: "ownerId query param is required",
+  userIdQueryRequired: "userId query param is required",
   invalidOwnerId: "Invalid ownerId",
   ownerNotFound: "Owner not found",
   columnIdsRequired: "columnIds array is required",

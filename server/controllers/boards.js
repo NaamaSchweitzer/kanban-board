@@ -9,6 +9,7 @@ import {
   reorderColumnsService,
   addMemberService,
   removeMemberService,
+  listBoardsByMemberService,
 } from "../services/boards.js";
 
 export const listBoardsByOwner = async (req, res) => {
@@ -28,6 +29,27 @@ export const listBoardsByOwner = async (req, res) => {
     return serverResponse(res, result.status, result.data);
   } catch (err) {
     console.error("listBoardsByOwner error:", err);
+    return serverResponse(res, 500, commonMessages.serverError);
+  }
+};
+
+export const listBoardsByMember = async (req, res) => {
+  try {
+    const { userId } = req.query;
+
+    if (!userId) {
+      return serverResponse(res, 400, boardMessages.userIdQueryRequired);
+    }
+
+    const result = await listBoardsByMemberService(userId);
+
+    if (!result.ok) {
+      return serverResponse(res, result.status, result.message);
+    }
+
+    return serverResponse(res, result.status, result.data);
+  } catch (err) {
+    console.error("listBoardsByMember error:", err);
     return serverResponse(res, 500, commonMessages.serverError);
   }
 };

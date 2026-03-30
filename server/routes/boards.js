@@ -8,12 +8,17 @@ import {
   reorderColumns,
   addMember,
   removeMember,
+  listBoardsByMember,
 } from "../controllers/boards.js";
 
 const router = Router();
 
-// POST /api/boards?ownerId=...
-router.get("/", listBoardsByOwner);
+// GET /boards?ownerId=... OR /boards?userId=...
+router.get("/", (req, res) => {
+  if (req.query.userId) return listBoardsByMember(req, res);
+  if (req.query.ownerId) return listBoardsByOwner(req, res);
+  return res.status(400).json({ message: "ownerId or userId query param is required" });
+});
 
 router.post("/", createBoard);
 router.get("/:boardId", getBoardById);

@@ -19,6 +19,20 @@ export const listBoardsByOwnerService = async (ownerId) => {
   return success(boards);
 };
 
+export const listBoardsByMemberService = async (userId) => {
+  if (!isValidObjectId(userId)) return failure(400, userMessages.invalidId);
+
+  const userExists = await User.exists({ _id: userId });
+  if (!userExists) return failure(404, boardMessages.memberNotFound);
+
+  const boards = await Board.find({
+    members: userId,
+    ownerId: { $ne: userId },
+  }).sort({ createdAt: -1 });
+
+  return success(boards);
+};
+
 export const getBoardByIdService = async (boardId) => {
   if (!isValidObjectId(boardId)) return failure(400, boardMessages.invalidId);
 
@@ -82,7 +96,7 @@ export const updateBoardService = async ({
   const updatedBoard = await Board.findByIdAndUpdate(boardId, updates, {
     new: true,
   }).populate("members", "username email");
-  
+
   if (!updatedBoard) return failure(404, boardMessages.notFound);
 
   return success(updatedBoard);
@@ -109,7 +123,7 @@ export const reorderColumnsService = async ({ boardId, columnIds }) => {
     { $set: { columnIds } },
     { new: true },
   ).populate("members", "username email");
-  
+
   if (!board) return failure(404, boardMessages.notFound);
 
   return success(board);
