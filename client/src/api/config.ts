@@ -1,4 +1,5 @@
-export const BASE = "http://localhost:3000/api";
+// export const BASE = "http://localhost:3000/api";
+export const BASE = "https://kanban-board-8fhn.onrender.com/api"
 
 export const jsonHeaders = { "Content-Type": "application/json" };
 
