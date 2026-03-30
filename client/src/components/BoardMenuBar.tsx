@@ -1,5 +1,7 @@
 import { useState } from "react";
 import {
+  Avatar,
+  AvatarGroup,
   Box,
   IconButton,
   Popover,
@@ -9,26 +11,32 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { Palette } from "@mui/icons-material";
-import type { BoardState } from "../types/kanban";
+import { Palette, PersonAdd } from "@mui/icons-material";
+import type { BoardState, UpdateBoardData } from "../types/kanban";
 import ColorPicker from "./ColorPicker";
+import ManageMembersPopover from "./ManageMembersPopover";
+import { stringAvatar } from "../utils/avatar";
 
 interface BoardMenuBarProps {
   boardState: BoardState | null;
-  onUpdateBoard: (data: {
-    name?: string;
-    description?: string;
-    color?: string | null;
-  }) => Promise<void>;
+  onUpdateBoard: (data: UpdateBoardData) => Promise<void>;
+  onAddMember: (userId: string) => Promise<void>;
+  onRemoveMember: (userId: string) => Promise<void>;
 }
 
-const BoardMenuBar = ({ boardState, onUpdateBoard }: BoardMenuBarProps) => {
+const BoardMenuBar = ({
+  boardState,
+  onUpdateBoard,
+  onAddMember,
+  onRemoveMember,
+}: BoardMenuBarProps) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [colorAnchor, setColorAnchor] = useState<HTMLElement | null>(null);
+  const [memberAnchor, setMemberAnchor] = useState<HTMLElement | null>(null);
 
   if (!boardState) return null;
 
@@ -118,6 +126,39 @@ const BoardMenuBar = ({ boardState, onUpdateBoard }: BoardMenuBarProps) => {
             />
           </Box>
         </Popover>
+      </Box>
+
+      {/* Board Members */}
+      <Box sx={{ ml: "auto", display: "flex", alignItems: "center", gap: 1 }}>
+        <AvatarGroup
+          max={5}
+          sx={{
+            "& .MuiAvatar-root": { width: 32, height: 32, fontSize: 14 },
+          }}
+        >
+          {board.members?.map((member) => (
+            <Tooltip key={member._id} title={member.username} arrow>
+              <Avatar {...stringAvatar(member.username)} />
+            </Tooltip>
+          ))}
+        </AvatarGroup>
+
+        <Tooltip title="Manage members" arrow>
+          <IconButton
+            size="small"
+            onClick={(e) => setMemberAnchor(e.currentTarget)}
+          >
+            <PersonAdd fontSize="small" />
+          </IconButton>
+        </Tooltip>
+
+        <ManageMembersPopover
+          board={board}
+          anchorEl={memberAnchor}
+          onClose={() => setMemberAnchor(null)}
+          onAddMember={onAddMember}
+          onRemoveMember={onRemoveMember}
+        />
       </Box>
     </Toolbar>
   );

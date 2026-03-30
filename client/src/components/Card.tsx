@@ -1,35 +1,32 @@
 import {
+  Avatar,
   CardActionArea,
   CardContent,
   Card as MuiCard,
   Chip,
+  Tooltip,
   Typography,
   IconButton,
   Box,
 } from "@mui/material";
 import { DeleteOutline } from "@mui/icons-material";
-import type { Card, Id, Tag } from "../types/kanban";
+import type { Card, Id, Member, UpdateCardData } from "../types/kanban";
 import ConfirmationModal from "./ConfirmationModal";
 import ExpandedCard from "./ExpandedCard";
 import { useState } from "react";
+import { stringAvatar } from "../utils/avatar";
 
 interface CardItemProps {
   card: Card;
+  members?: Member[];
   isDragging?: boolean;
-  onUpdateCard?: (
-    cardId: Id,
-    data: {
-      title?: string;
-      description?: string;
-      dueDate?: string | null;
-      tags?: Tag[];
-    },
-  ) => Promise<void>;
+  onUpdateCard?: (cardId: Id, data: UpdateCardData) => Promise<void>;
   onDeleteCard?: (cardId: Id, columnId: Id) => Promise<void>;
 }
 
 const CardItem = ({
   card,
+  members = [],
   isDragging = false,
   onUpdateCard,
   onDeleteCard,
@@ -78,19 +75,34 @@ const CardItem = ({
               <Typography variant="subtitle1" sx={{ flex: 1 }}>
                 {card.title}
               </Typography>
-            {onDeleteCard && (
-              <Box
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setOpenDeleteModal(true);
-                }}
-              >
-                <IconButton size="small">
-                  <DeleteOutline fontSize="small" />
-                </IconButton>
-              </Box>
-            )}
+
+              {/* Assignee's Avatar */}
+              {card.assignee && (
+                <Tooltip title={card.assignee.username} arrow>
+                  <Avatar
+                    {...stringAvatar(card.assignee.username, {
+                      width: 24,
+                      height: 24,
+                      fontSize: 11,
+                    })}
+                  />
+                </Tooltip>
+              )}
+
+              {/* Delete Button */}
+              {onDeleteCard && (
+                <Box
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenDeleteModal(true);
+                  }}
+                >
+                  <IconButton size="small">
+                    <DeleteOutline fontSize="small" />
+                  </IconButton>
+                </Box>
+              )}
             </Box>
           </CardContent>
         </CardActionArea>
@@ -109,6 +121,7 @@ const CardItem = ({
       {onUpdateCard && openExpanded && (
         <ExpandedCard
           card={card}
+          members={members}
           open={openExpanded}
           onClose={() => setOpenExpanded(false)}
           onUpdateCard={onUpdateCard}

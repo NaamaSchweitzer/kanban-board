@@ -7,6 +7,7 @@ import {
   Button,
   IconButton,
   TextField,
+  MenuItem,
   Divider,
   Chip,
 } from "@mui/material";
@@ -14,27 +15,21 @@ import { Close, DeleteOutline, Add } from "@mui/icons-material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { enGB } from "date-fns/locale";
-import type { Card, Id, Tag } from "../types/kanban";
+import type { Card, Id, Member, Tag, UpdateCardData } from "../types/kanban";
 import ColorPicker from "./ColorPicker";
 
 interface ExpandedCardProps {
   card: Card;
+  members: Member[];
   open: boolean;
   onClose: () => void;
-  onUpdateCard: (
-    cardId: Id,
-    data: {
-      title?: string;
-      description?: string;
-      dueDate?: string | null;
-      tags?: Tag[];
-    },
-  ) => void;
+  onUpdateCard: (cardId: Id, data: UpdateCardData) => void;
   onDeleteCard: () => void;
 }
 
 const ExpandedCard = ({
   card,
+  members,
   open,
   onClose,
   onUpdateCard,
@@ -44,6 +39,9 @@ const ExpandedCard = ({
   const [description, setDescription] = useState(card.description ?? "");
   const [selectedDueDate, setSelectedDueDate] = useState<Date | null>(
     card.dueDate ? new Date(card.dueDate) : null,
+  );
+  const [selectedAssignee, setSelectedAssignee] = useState<string>(
+    card.assignee?._id ?? "",
   );
   const [tags, setTags] = useState<Tag[]>(card.tags ?? []);
   const [newTagLabel, setNewTagLabel] = useState("");
@@ -72,6 +70,7 @@ const ExpandedCard = ({
       title: trimmedTitle,
       description: description.trim(),
       dueDate: selectedDueDate?.toISOString() ?? null,
+      assignee: selectedAssignee || null,
       tags,
     });
     onClose();
@@ -142,6 +141,30 @@ const ExpandedCard = ({
                       slotProps={{ textField: { fullWidth: true } }}
                     />
                   </LocalizationProvider>
+                </Grid>
+              </Grid>
+            </Grid>
+
+            {/* Assignee */}
+            <Grid size={{ xs: 12 }}>
+              <Grid container alignItems="center" spacing={2}>
+                <Grid size={{ xs: 12, sm: 4 }}>
+                  <Typography variant="subtitle1">Assignee:</Typography>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 8 }}>
+                  <TextField
+                    select
+                    fullWidth
+                    value={selectedAssignee}
+                    onChange={(e) => setSelectedAssignee(e.target.value)}
+                  >
+                    <MenuItem value="">Unassigned</MenuItem>
+                    {members.map((member) => (
+                      <MenuItem key={member._id} value={member._id}>
+                        {member.username}
+                      </MenuItem>
+                    ))}
+                  </TextField>
                 </Grid>
               </Grid>
             </Grid>

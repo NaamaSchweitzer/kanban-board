@@ -26,6 +26,8 @@ const BoardWrapper = ({ boardId }: BoardWrapperProps) => {
       <BoardMenuBar
         boardState={board.boardState}
         onUpdateBoard={board.updateBoard}
+        onAddMember={board.addMember}
+        onRemoveMember={board.removeMember}
       />
       <Board board={board} />
     </Box>

@@ -1,19 +1,24 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Card, DraggableCardData, Id } from "../types/kanban";
+import type {
+  Card,
+  DraggableCardData,
+  Id,
+  Member,
+  UpdateCardData,
+} from "../types/kanban";
 import CardItem from "./Card";
 
 interface SortableCardProps {
   card: Card;
-  onUpdateCard?: (
-    cardId: Id,
-    data: { title?: string; description?: string; dueDate?: string | null },
-  ) => Promise<void>;
+  members: Member[];
+  onUpdateCard?: (cardId: Id, data: UpdateCardData) => Promise<void>;
   onDeleteCard?: (cardId: Id, columnId: Id) => Promise<void>;
 }
 
 const SortableCard = ({
   card,
+  members,
   onUpdateCard,
   onDeleteCard,
 }: SortableCardProps) => {
@@ -44,6 +49,7 @@ const SortableCard = ({
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <CardItem
         card={card}
+        members={members}
         onUpdateCard={onUpdateCard}
         onDeleteCard={onDeleteCard}
       />

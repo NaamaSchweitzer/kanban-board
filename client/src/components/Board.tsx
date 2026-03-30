@@ -78,6 +78,7 @@ const Board = ({ board }: BoardProps) => {
                 key={col._id}
                 column={col}
                 cards={col.cardIds.map((id) => cards[id]).filter(Boolean)}
+                members={boardData.members ?? []}
                 onUpdateColumn={updateColumn}
                 onDeleteColumn={deleteColumn}
                 onCreateCard={createCard}

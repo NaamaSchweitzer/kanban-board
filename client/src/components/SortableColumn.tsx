@@ -4,29 +4,35 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Card, Column, DraggableColumnData, Id } from "../types/kanban";
+import type {
+  Card,
+  Column,
+  DraggableColumnData,
+  Id,
+  Member,
+  UpdateCardData,
+} from "../types/kanban";
 import ColumnItem from "./Column";
 import SortableCard from "./SortableCard";
 
 interface SortableColumnProps {
   column: Column;
   cards: Card[];
+  members: Member[];
   onUpdateColumn: (columnId: Id, title: string) => Promise<void>;
   onDeleteColumn: (columnId: Id) => Promise<void>;
   onCreateCard: (
     columnId: Id,
     data: { title: string; description?: string; dueDate?: string | null },
   ) => Promise<void>;
-  onUpdateCard: (
-    cardId: Id,
-    data: { title?: string; description?: string; dueDate?: string | null },
-  ) => Promise<void>;
+  onUpdateCard: (cardId: Id, data: UpdateCardData) => Promise<void>;
   onDeleteCard: (cardId: Id, columnId: Id) => Promise<void>;
 }
 
 const SortableColumn = ({
   column,
   cards,
+  members,
   onUpdateColumn,
   onDeleteColumn,
   onCreateCard,
@@ -68,6 +74,7 @@ const SortableColumn = ({
             <SortableCard
               key={card._id}
               card={card}
+              members={members}
               onUpdateCard={onUpdateCard}
               onDeleteCard={onDeleteCard}
             />
