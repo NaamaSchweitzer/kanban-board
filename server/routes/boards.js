@@ -10,8 +10,11 @@ import {
   removeMember,
   listBoardsByMember,
 } from "../controllers/boards.js";
+import { verifyBoardMember, verifyBoardOwner, verifyToken } from "../middleware/auth.js";
 
 const router = Router();
+
+router.use(verifyToken);
 
 // GET /boards?ownerId=... OR /boards?userId=...
 router.get("/", (req, res) => {
@@ -21,16 +24,16 @@ router.get("/", (req, res) => {
 });
 
 router.post("/", createBoard);
-router.get("/:boardId", getBoardById);
-router.put("/:boardId", updateBoard);
-router.delete("/:boardId", deleteBoard);
+router.get("/:boardId", verifyBoardMember, getBoardById);
+router.put("/:boardId", verifyBoardOwner, updateBoard);
+router.delete("/:boardId", verifyBoardOwner, deleteBoard);
 
 // column drag & drop
-router.patch("/:boardId/reorder-columns", reorderColumns);
+router.patch("/:boardId/reorder-columns", verifyBoardMember, reorderColumns);
 
 // board members
-router.post("/:boardId/members", addMember);
-router.delete("/:boardId/members/:userId", removeMember);
+router.post("/:boardId/members", verifyBoardOwner, addMember);
+router.delete("/:boardId/members/:userId", verifyBoardOwner, removeMember);
 
 export default router;
 
