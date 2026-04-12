@@ -5,12 +5,14 @@
       {
         "title": "Task A",
         "description": "First task",
-        "dueDate": null
+        "dueDate": null,
+        "tags": [{ "label": "feature", "color": "#DBEAFE" }]
       },
       {
         "title": "Task B",
         "description": null,
-        "dueDate": null
+        "dueDate": null,
+        "tags": [{ "label": "bug", "color": "#FEE2E2" }, { "label": "urgent", "color": "#FEF9C3" }]
       }
     ]
   },

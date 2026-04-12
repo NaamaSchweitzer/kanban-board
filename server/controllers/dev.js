@@ -38,13 +38,17 @@ export const resetDB = async (req, res) => {
       insertedUsers.push(result.data.user);
     }
     const demoUserId = insertedUsers[0]._id;
+    const aliceUserId = insertedUsers[1]?._id;
 
-    // insert boards, link to real user ID (empty columnIds for now, owner as first member)
+    // insert boards, link to real user ID (empty columnIds for now, owner + alice as members)
+    const memberIds = [demoUserId];
+    if (aliceUserId) memberIds.push(aliceUserId);
+
     const boardDocs = boardSeeds.map((b) => ({
       ...b,
       ownerId: demoUserId,
       columnIds: [],
-      members: [demoUserId],
+      members: memberIds,
     }));
     const insertedBoards = await Board.insertMany(boardDocs);
     const demoBoardId = insertedBoards[0]._id;
@@ -64,11 +68,13 @@ export const resetDB = async (req, res) => {
 
       // create cards for this column
       const cardIds = [];
-      for (const cardSeed of cardSeeds) {
+      for (const [i, cardSeed] of cardSeeds.entries()) {
         const card = await Card.create({
           ...cardSeed,
           boardId: demoBoardId,
           columnId: column._id,
+          // assign first card to alice
+          assignee: i === 0 && aliceUserId ? aliceUserId : null,
         });
         cardIds.push(card._id);
       }
