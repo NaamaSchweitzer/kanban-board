@@ -19,6 +19,7 @@ interface SortableColumnProps {
   column: Column;
   cards: Card[];
   members: Member[];
+  disabled?: boolean;
   onUpdateColumn: (columnId: Id, title: string) => Promise<void>;
   onDeleteColumn: (columnId: Id) => Promise<void>;
   onCreateCard: (
@@ -33,6 +34,7 @@ const SortableColumn = ({
   column,
   cards,
   members,
+  disabled,
   onUpdateColumn,
   onDeleteColumn,
   onCreateCard,
@@ -49,6 +51,7 @@ const SortableColumn = ({
   } = useSortable({
     id: column._id,
     data: { type: "column", column } satisfies DraggableColumnData,
+    disabled,
   });
 
   const style = {
@@ -75,6 +78,7 @@ const SortableColumn = ({
               key={card._id}
               card={card}
               members={members}
+              disabled={disabled}
               onUpdateCard={onUpdateCard}
               onDeleteCard={onDeleteCard}
             />

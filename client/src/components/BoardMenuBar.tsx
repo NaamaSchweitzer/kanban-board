@@ -13,8 +13,10 @@ import {
 } from "@mui/material";
 import { Palette, PersonAdd } from "@mui/icons-material";
 import type { BoardState, UpdateBoardData } from "../types/kanban";
+import type { Filters } from "../utils/filters";
 import ColorPicker from "./ColorPicker";
 import ManageMembersPopover from "./ManageMembersPopover";
+import FilterMenu from "./FilterMenu";
 import { stringAvatar } from "../utils/avatar";
 
 interface BoardMenuBarProps {
@@ -22,6 +24,8 @@ interface BoardMenuBarProps {
   onUpdateBoard: (data: UpdateBoardData) => Promise<void>;
   onAddMember: (userId: string) => Promise<void>;
   onRemoveMember: (userId: string) => Promise<void>;
+  filters: Filters;
+  onFiltersChange: (next: Filters) => void;
 }
 
 const BoardMenuBar = ({
@@ -29,6 +33,8 @@ const BoardMenuBar = ({
   onUpdateBoard,
   onAddMember,
   onRemoveMember,
+  filters,
+  onFiltersChange,
 }: BoardMenuBarProps) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -126,6 +132,16 @@ const BoardMenuBar = ({
             />
           </Box>
         </Popover>
+      </Box>
+
+      {/* Filter Menu */}
+      <Box sx={{ ml: 1 }}>
+        <FilterMenu
+          filters={filters}
+          onChange={onFiltersChange}
+          members={board.members ?? []}
+          cards={Object.values(boardState.cards)}
+        />
       </Box>
 
       {/* Board Members */}

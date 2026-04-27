@@ -14,6 +14,11 @@ import {
 import { Box, Stack } from "@mui/material";
 import { createPortal } from "react-dom";
 import type { useBoard } from "../hooks/useBoard";
+import {
+  activeFilterCount,
+  cardMatchesFilters,
+  type Filters,
+} from "../utils/filters";
 import SortableColumn from "./SortableColumn";
 import CardItem from "./Card";
 import ColumnItem from "./Column";
@@ -21,9 +26,10 @@ import AddNewColumn from "./AddNewColumn";
 
 interface BoardProps {
   board: ReturnType<typeof useBoard>;
+  filters: Filters;
 }
 
-const Board = ({ board }: BoardProps) => {
+const Board = ({ board, filters }: BoardProps) => {
   const {
     boardState,
     activeCard,
@@ -38,6 +44,10 @@ const Board = ({ board }: BoardProps) => {
     updateCard,
     deleteCard,
   } = board;
+
+  // Disable DnD when any filter is active — visible-card indices wouldn't
+  // match the underlying full cardIds array, so reorder would corrupt order.
+  const isFiltered = activeFilterCount(filters) > 0;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -77,8 +87,12 @@ const Board = ({ board }: BoardProps) => {
               <SortableColumn
                 key={col._id}
                 column={col}
-                cards={col.cardIds.map((id) => cards[id]).filter(Boolean)}
+                cards={col.cardIds
+                  .map((id) => cards[id])
+                  .filter(Boolean)
+                  .filter((card) => cardMatchesFilters(card, filters))}
                 members={boardData.members ?? []}
+                disabled={isFiltered}
                 onUpdateColumn={updateColumn}
                 onDeleteColumn={deleteColumn}
                 onCreateCard={createCard}

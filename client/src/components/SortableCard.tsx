@@ -12,6 +12,7 @@ import CardItem from "./Card";
 interface SortableCardProps {
   card: Card;
   members: Member[];
+  disabled?: boolean;
   onUpdateCard?: (cardId: Id, data: UpdateCardData) => Promise<void>;
   onDeleteCard?: (cardId: Id, columnId: Id) => Promise<void>;
 }
@@ -19,6 +20,7 @@ interface SortableCardProps {
 const SortableCard = ({
   card,
   members,
+  disabled,
   onUpdateCard,
   onDeleteCard,
 }: SortableCardProps) => {
@@ -36,13 +38,14 @@ const SortableCard = ({
       card,
       columnId: card.columnId,
     } satisfies DraggableCardData,
+    disabled,
   });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0 : 1,
-    cursor: isDragging ? "grabbing" : "grab",
+    cursor: disabled ? "default" : isDragging ? "grabbing" : "grab",
   };
 
   return (

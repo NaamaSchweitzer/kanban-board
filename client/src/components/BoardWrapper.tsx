@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Box, useTheme } from "@mui/material";
 import { useBoard } from "../hooks/useBoard";
+import { defaultFilters, type Filters } from "../utils/filters";
 import Board from "./Board";
 import BoardMenuBar from "./BoardMenuBar";
 
@@ -12,6 +14,8 @@ const BoardWrapper = ({ boardId }: BoardWrapperProps) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const boardColor = board.boardState?.board.color;
+
+  const [filters, setFilters] = useState<Filters>(defaultFilters);
 
   return (
     <Box
@@ -28,8 +32,10 @@ const BoardWrapper = ({ boardId }: BoardWrapperProps) => {
         onUpdateBoard={board.updateBoard}
         onAddMember={board.addMember}
         onRemoveMember={board.removeMember}
+        filters={filters}
+        onFiltersChange={setFilters}
       />
-      <Board board={board} />
+      <Board board={board} filters={filters} />
     </Box>
   );
 };
