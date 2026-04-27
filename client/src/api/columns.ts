@@ -1,10 +1,10 @@
 import type { Id, ReorderCardsPayload } from "../types/kanban";
-import { BASE, jsonHeaders, parseError } from "./config";
+import { BASE, authHeaders, parseError } from "./config";
 
 export const createColumn = async (data: { title: string; boardId: Id }) => {
   const response = await fetch(`${BASE}/columns`, {
     method: "POST",
-    headers: jsonHeaders,
+    headers: authHeaders(),
     body: JSON.stringify(data),
   });
   if (!response.ok) await parseError(response, "Failed to create column");
@@ -17,7 +17,7 @@ export const updateColumn = async (
 ) => {
   const response = await fetch(`${BASE}/columns/${columnId}`, {
     method: "PUT",
-    headers: jsonHeaders,
+    headers: authHeaders(),
     body: JSON.stringify(data),
   });
   if (!response.ok) await parseError(response, "Failed to update column");
@@ -27,6 +27,7 @@ export const updateColumn = async (
 export const deleteColumn = async (columnId: Id) => {
   const response = await fetch(`${BASE}/columns/${columnId}`, {
     method: "DELETE",
+    headers: authHeaders(),
   });
   if (!response.ok) await parseError(response, "Failed to delete column");
   return response.json();
@@ -38,7 +39,7 @@ export const reorderCards = async ({
 }: ReorderCardsPayload) => {
   const response = await fetch(`${BASE}/columns/${columnId}/reorder-cards`, {
     method: "PATCH",
-    headers: jsonHeaders,
+    headers: authHeaders(),
     body: JSON.stringify({ cardIds }),
   });
   if (!response.ok) await parseError(response, "Failed to reorder cards");

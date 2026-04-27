@@ -4,22 +4,28 @@ import type {
   ReorderColumnsPayload,
   UpdateBoardData,
 } from "../types/kanban";
-import { BASE, jsonHeaders, parseError } from "./config";
+import { BASE, authHeaders, parseError } from "./config";
 
 export const fetchBoard = async (boardId: string) => {
-  const response = await fetch(`${BASE}/boards/${boardId}`);
+  const response = await fetch(`${BASE}/boards/${boardId}`, {
+    headers: authHeaders(),
+  });
   if (!response.ok) await parseError(response, "Board not found");
   return response.json();
 };
 
 export const listBoards = async (ownerId: string) => {
-  const response = await fetch(`${BASE}/boards?ownerId=${ownerId}`);
+  const response = await fetch(`${BASE}/boards?ownerId=${ownerId}`, {
+    headers: authHeaders(),
+  });
   if (!response.ok) await parseError(response, "Failed to list boards");
   return response.json();
 };
 
 export const listMemberBoards = async (userId: string) => {
-  const response = await fetch(`${BASE}/boards?userId=${userId}`);
+  const response = await fetch(`${BASE}/boards?userId=${userId}`, {
+    headers: authHeaders(),
+  });
   if (!response.ok) await parseError(response, "Failed to list member boards");
   return response.json();
 };
@@ -27,7 +33,7 @@ export const listMemberBoards = async (userId: string) => {
 export const createBoard = async (data: CreateBoardData) => {
   const response = await fetch(`${BASE}/boards`, {
     method: "POST",
-    headers: jsonHeaders,
+    headers: authHeaders(),
     body: JSON.stringify(data),
   });
   if (!response.ok) await parseError(response, "Failed to create board");
@@ -37,7 +43,7 @@ export const createBoard = async (data: CreateBoardData) => {
 export const updateBoard = async (boardId: Id, data: UpdateBoardData) => {
   const response = await fetch(`${BASE}/boards/${boardId}`, {
     method: "PUT",
-    headers: jsonHeaders,
+    headers: authHeaders(),
     body: JSON.stringify(data),
   });
   if (!response.ok) await parseError(response, "Failed to update board");
@@ -47,6 +53,7 @@ export const updateBoard = async (boardId: Id, data: UpdateBoardData) => {
 export const deleteBoard = async (boardId: Id) => {
   const response = await fetch(`${BASE}/boards/${boardId}`, {
     method: "DELETE",
+    headers: authHeaders(),
   });
   if (!response.ok) await parseError(response, "Failed to delete board");
   return response.json();
@@ -58,7 +65,7 @@ export const reorderColumns = async ({
 }: ReorderColumnsPayload) => {
   const response = await fetch(`${BASE}/boards/${boardId}/reorder-columns`, {
     method: "PATCH",
-    headers: jsonHeaders,
+    headers: authHeaders(),
     body: JSON.stringify({ columnIds }),
   });
   if (!response.ok) await parseError(response, "Failed to reorder columns");
@@ -68,7 +75,7 @@ export const reorderColumns = async ({
 export const addMember = async (boardId: Id, userId: string) => {
   const response = await fetch(`${BASE}/boards/${boardId}/members`, {
     method: "POST",
-    headers: jsonHeaders,
+    headers: authHeaders(),
     body: JSON.stringify({ userId }),
   });
   if (!response.ok) await parseError(response, "Failed to add member");
@@ -78,6 +85,7 @@ export const addMember = async (boardId: Id, userId: string) => {
 export const removeMember = async (boardId: Id, userId: string) => {
   const response = await fetch(`${BASE}/boards/${boardId}/members/${userId}`, {
     method: "DELETE",
+    headers: authHeaders(),
   });
   if (!response.ok) await parseError(response, "Failed to remove member");
   return response.json();

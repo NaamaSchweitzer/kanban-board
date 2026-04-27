@@ -4,12 +4,12 @@ import type {
   MoveCardPayload,
   UpdateCardData,
 } from "../types/kanban";
-import { BASE, jsonHeaders, parseError } from "./config";
+import { BASE, authHeaders, parseError } from "./config";
 
 export const createCard = async (data: CreateCardData) => {
   const response = await fetch(`${BASE}/cards`, {
     method: "POST",
-    headers: jsonHeaders,
+    headers: authHeaders(),
     body: JSON.stringify(data),
   });
   if (!response.ok) await parseError(response, "Failed to create card");
@@ -19,7 +19,7 @@ export const createCard = async (data: CreateCardData) => {
 export const updateCard = async (cardId: Id, data: UpdateCardData) => {
   const response = await fetch(`${BASE}/cards/${cardId}`, {
     method: "PUT",
-    headers: jsonHeaders,
+    headers: authHeaders(),
     body: JSON.stringify(data),
   });
   if (!response.ok) await parseError(response, "Failed to update card");
@@ -29,6 +29,7 @@ export const updateCard = async (cardId: Id, data: UpdateCardData) => {
 export const deleteCard = async (cardId: Id) => {
   const response = await fetch(`${BASE}/cards/${cardId}`, {
     method: "DELETE",
+    headers: authHeaders(),
   });
   if (!response.ok) await parseError(response, "Failed to delete card");
   return response.json();
@@ -43,7 +44,7 @@ export const moveCard = async ({
 }: MoveCardPayload) => {
   const response = await fetch(`${BASE}/cards/${cardId}/move`, {
     method: "PATCH",
-    headers: jsonHeaders,
+    headers: authHeaders(),
     body: JSON.stringify({
       sourceColumnId,
       destinationColumnId,
